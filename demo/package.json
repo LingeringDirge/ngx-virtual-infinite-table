@@ -1,10 +1,10 @@
 {
-  "name": "ngx-infinite-scroll-table-demo",
+  "name": "ngx-virtual-infinite-table-demo",
   "version": "1.0.0",
   "private": true,
   "scripts": {
     "start": "ng serve",
-    "build": "ng build --base-href /ngx-infinite-scroll-table/",
+    "build": "ng build --base-href /ngx-virtual-infinite-table/",
     "deploy": "bash deploy-github-pages.sh"
   },
   "dependencies": {

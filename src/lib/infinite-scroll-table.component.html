@@ -204,7 +204,10 @@
             </mat-row>
 
             @if (!!expandedRowTemplate()) {
-                <mat-row *matRowDef="let row; columns: ['expandedRow']" class="mat-expansion-row" />
+                <mat-row
+                *matRowDef="let row; columns: ['expandedRow']"
+                class="mat-expansion-row"
+                [class.expanded]="row | isRowExpanded: expandedRows" />
             }
         </mat-table>
 

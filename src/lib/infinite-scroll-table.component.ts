@@ -265,6 +265,14 @@ export class InfiniteScrollTableComponent<T = any>
      * MatTable column key identifiers -- auto-computed from visible columns.
      * Reactive to hiddenColumns, isRowSelected, enableDrag, expandedRowTemplate.
      */
+    /**
+     * Rebuilds columnKeys from current templates and flags.
+     * Maintained for 100% backwards compatibility with ESMS Core.
+     */
+    public updateColumnKeys(): void {
+        // columnKeys is an auto-reactive computed signal in this package.
+    }
+
     public columnKeys = computed(() => {
         const visible = this.visibleTemplateColumns();
         const dataColumns = visible?.map(({ col, idx }) => col.title || idx.toString()) ?? [];

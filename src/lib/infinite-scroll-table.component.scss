@@ -194,12 +194,39 @@
 
         // Expansion Row Detail
         .mat-expansion-row {
-            height: 0;
+            min-height: 0 !important;
+            height: 0 !important;
+            border-bottom: none !important;
+            overflow: hidden;
+
+            &:not(.expanded) {
+                display: none !important;
+            }
+
+            &.expanded {
+                display: flex !important;
+                height: auto !important;
+                min-height: auto !important;
+                overflow: visible;
+                border-bottom: 1px solid var(--mat-sys-outline-variant, #cac4d0) !important;
+            }
 
             td,
             mat-cell {
-                border-bottom-width: 0;
-                padding: 0;
+                border-bottom-width: 0 !important;
+                padding: 0 !important;
+                min-height: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                flex: 1 1 100% !important;
+                overflow: hidden;
+            }
+
+            &.expanded td,
+            &.expanded mat-cell {
+                height: auto !important;
+                min-height: auto !important;
+                overflow: visible;
             }
 
             .expansion-content {
@@ -209,13 +236,15 @@
                 overflow: hidden;
                 height: 0;
                 min-height: 0;
+                width: 100%;
                 background-color: var(--mat-sys-surface-container, #f3edf7);
                 transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease;
 
                 &.expansion-show {
-                    height: initial;
+                    height: auto;
                     max-height: 9999px;
                     padding: 16px;
+                    overflow: visible;
                 }
             }
         }

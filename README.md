@@ -43,11 +43,11 @@ The package has peer dependencies on `@angular/material`, `@angular/cdk`, and `n
 ### 1. Import the component
 
 ```typescript
-import { InfiniteScrollTableComponent, InfiniteScrollTableTemplateColumnDirective } from 'ngx-virtual-infinite-table';
+import { InfiniteScrollTableModule } from 'ngx-virtual-infinite-table';
 
 @Component({
   standalone: true,
-  imports: [InfiniteScrollTableComponent, InfiniteScrollTableTemplateColumnDirective],
+  imports: [InfiniteScrollTableModule],
   // ...
 })
 export class MyComponent {}

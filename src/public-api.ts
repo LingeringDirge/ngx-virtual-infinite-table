@@ -1,12 +1,13 @@
 /*
- * Public API Surface of ngx-infinite-scroll-table
+ * Public API Surface of ngx-virtual-infinite-table
  */
 
-// Components
+// NgModule bundle
+export * from './lib/infinite-scroll-table.module';
+
+// Components & Directives (can still be imported standalone)
 export * from './lib/infinite-scroll-table.component';
 export * from './lib/filter/infinite-scroll-table-filter.component';
-
-// Directives
 export * from './lib/directives/infinite-scroll-table-template-column.directive';
 export * from './lib/directives/click-outside.directive';
 

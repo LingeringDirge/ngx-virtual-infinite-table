@@ -59,10 +59,10 @@ export class AppComponent implements OnInit {
     public table = viewChild(InfiniteScrollTableComponent);
 
     // ── Feature Toggles ────────────────────────────────────────────────────
-    public isVirtualScroll = signal(false);
+    public isVirtualScroll = signal(true);
     public isDarkMode = signal(false);
     public enableDrag = signal(false);
-    public enableExpansion = signal(true);
+    public enableExpansion = signal(false);
     public enableRowStripes = signal(true);
     public enableWordWrap = signal(false);
     public fitContent = signal(false);

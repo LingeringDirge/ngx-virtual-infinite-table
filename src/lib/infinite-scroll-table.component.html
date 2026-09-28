@@ -87,7 +87,7 @@
             tabindex="0"
             [attr.aria-label]="ariaLabel() || 'Scrollable data table'">
             @if (enableDrag()) {
-                <ng-container [matColumnDef]="'drag'">
+                <ng-container [matColumnDef]="'drag'" [sticky]="true">
                     <mat-header-cell *matHeaderCellDef class="drag-column" />
                     <mat-cell *matCellDef="let data; index as i" class="drag-column">
                         <mat-icon class="drag-icon" cdkDragHandle>drag_indicator</mat-icon>
@@ -95,7 +95,7 @@
                 </ng-container>
             }
             @if (isRowSelected()) {
-                <ng-container [matColumnDef]="'selection'">
+                <ng-container [matColumnDef]="'selection'" [sticky]="true">
                     <mat-header-cell *matHeaderCellDef class="checkbox-column">
                         <mat-checkbox
                             [checked]="allSelected()"
@@ -126,7 +126,7 @@
             }
 
             @if (!!expandedRowTemplate()) {
-                <ng-container [matColumnDef]="'expand'">
+                <ng-container [matColumnDef]="'expand'" [sticky]="true">
                     <mat-header-cell *matHeaderCellDef class="button-column" />
                     <mat-cell *matCellDef="let element; index as i" class="button-column">
                         <mat-icon
@@ -253,7 +253,7 @@
             <div class="virtual-header-wrapper" #virtualHeaderWrapper>
                 <mat-table [dataSource]="[]" class="virtual-header-table">
                     @if (isRowSelected()) {
-                        <ng-container [matColumnDef]="'selection'">
+                        <ng-container [matColumnDef]="'selection'" [sticky]="true">
                             <mat-header-cell *matHeaderCellDef class="checkbox-column">
                                 <mat-checkbox
                                     [checked]="allSelected()"
@@ -302,7 +302,7 @@
             [attr.aria-label]="ariaLabel() || 'Scrollable data table'">
             <mat-table [dataSource]="virtualVisibleItems()" [trackBy]="trackBy()" class="virtual-body-table">
                 @if (isRowSelected()) {
-                    <ng-container [matColumnDef]="'selection'">
+                    <ng-container [matColumnDef]="'selection'" [sticky]="true">
                         <mat-cell
                             *matCellDef="let data; index as i"
                             class="checkbox-column"

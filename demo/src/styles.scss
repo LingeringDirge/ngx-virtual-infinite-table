@@ -27,6 +27,24 @@ html, body {
   --mat-sys-tertiary-container: #e0e7ff;
   --mat-sys-outline: #cbd5e1;
   --mat-sys-outline-variant: #e2e8f0;
+
+  // Material 3 button state layer tokens
+  --mat-sys-hover-state-layer-opacity: 0.08;
+  --mat-sys-focus-state-layer-opacity: 0.12;
+  --mat-sys-pressed-state-layer-opacity: 0.12;
+  --mat-outlined-button-hover-state-layer-opacity: 0.08;
+  --mat-outlined-button-state-layer-color: #3b82f6;
+}
+
+// Fix stroked button hover visibility
+.mat-mdc-outlined-button:not(:disabled):hover {
+  background-color: var(--mat-sys-surface-variant, #f1f5f9) !important;
+  color: var(--mat-sys-primary, #3b82f6) !important;
+}
+
+body.dark-theme .mat-mdc-outlined-button:not(:disabled):hover {
+  background-color: var(--mat-sys-surface-variant, #1e293b) !important;
+  color: var(--mat-sys-primary, #60a5fa) !important;
 }
 
 body.dark-theme {

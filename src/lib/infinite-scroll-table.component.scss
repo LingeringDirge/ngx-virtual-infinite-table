@@ -136,8 +136,17 @@
             }
 
             .drag-column,
-            .checkbox-column {
-                flex: 0 0 auto;
+            .checkbox-column,
+            .button-column {
+                flex: 0 0 48px;
+                width: 48px;
+                min-width: 48px;
+                max-width: 48px;
+                box-sizing: border-box;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                padding: 0 4px !important;
 
                 .checkbox-tooltip-wrapper {
                     display: inline-flex;

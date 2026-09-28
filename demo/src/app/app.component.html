@@ -20,10 +20,10 @@
         </div>
     </header>
 
-    <!-- ── Toolbar ─────────────────────────────────────────────────────────── -->
+    <!-- ── Sticky Control Toolbar ─────────────────────────────────────────── -->
     <section class="demo-toolbar">
 
-        <!-- Mode Toggle Segmented Button -->
+        <!-- Mode Toggle Segmented Button (Default: Virtualized Infinite) -->
         <div class="toolbar-group mode-group">
             <mat-button-toggle-group
                 [value]="isVirtualScroll() ? 'virtual' : 'infinite'"
@@ -53,9 +53,9 @@
             }
         </div>
 
-        <!-- Actions -->
+        <!-- Action Controls -->
         <div class="toolbar-group actions-group">
-            <!-- Column Picker -->
+            <!-- Column Visibility Picker -->
             <button mat-stroked-button [matMenuTriggerFor]="colMenu" matTooltip="Configure column visibility and reset widths">
                 <mat-icon>view_column</mat-icon>
                 Columns
@@ -83,7 +83,7 @@
                 </button>
             </mat-form-field>
 
-            <!-- Expand/Collapse all -->
+            <!-- Expand/Collapse All (Standard Mode) -->
             @if (enableExpansion() && !isVirtualScroll()) {
                 <button mat-stroked-button (click)="expandAll()" matTooltip="Expand all product details">
                     <mat-icon>unfold_more</mat-icon>
@@ -95,7 +95,7 @@
                 </button>
             }
 
-            <!-- CSV Export -->
+            <!-- CSV Export Utility -->
             <button mat-stroked-button (click)="exportCsv()" matTooltip="Export visible table data to CSV file">
                 <mat-icon>download</mat-icon>
                 Export CSV
@@ -126,62 +126,63 @@
         </span>
         @if (selectedRowIds().size > 0) {
             <span class="status-chip highlight" matTooltip="Number of selected rows">
-                <strong>Selected:</strong>&nbsp;{{ selectedRowIds().size }} rows
+                <mat-icon class="hint-icon">check_circle</mat-icon>
+                {{ selectedRowIds().size }} selected
             </span>
         }
-        @if (sortField()) {
-            <span class="status-chip" matTooltip="Current sort column and direction">
-                <strong>Sort:</strong>&nbsp;{{ sortField() }} ({{ sortDirection() === 1 ? 'Asc' : 'Desc' }})
-            </span>
-        }
-        @if (hiddenColumnSet().size > 0) {
-            <span class="status-chip muted" matTooltip="Number of hidden columns">
-                <strong>Hidden cols:</strong>&nbsp;{{ hiddenColumnSet().size }}
-            </span>
-        }
-        <span class="status-chip hint" matTooltip="Hover near column header borders and drag to resize">
-            <mat-icon class="hint-icon">drag_indicator</mat-icon>
-            Drag column edges to resize
+        <span class="status-chip muted" matTooltip="Active rendering strategy">
+            <strong>Engine:</strong>&nbsp;{{ isVirtualScroll() ? 'CDK Virtual Viewport + Worker Filter' : 'Standard MatTable' }}
         </span>
+        @if (isVirtualScroll()) {
+            <span class="status-chip hint">
+                <mat-icon class="hint-icon">info</mat-icon>
+                DOM keeps only ~25 rows rendered while streaming 5,000 items seamlessly.
+            </span>
+        }
     </div>
 
-    <!-- ── Table ───────────────────────────────────────────────────────────── -->
+    <!-- ── Table Container Card ────────────────────────────────────────────── -->
+    <!--
+      The table container card has a fixed height (or flex-grow) to contain
+      the virtual scroll viewport. In virtual mode, the table header stays
+      pinned at the top of the card while the virtual viewport scrolls below.
+    -->
     <main class="table-card">
         <ngx-virtual-infinite-table
             #table
             [items]="displayedProducts()"
-            [loadMoreRows]="loadMoreRows"
-            [hasMoreData]="hasMoreData()"
-            [isLoading]="isLoading()"
-            [enableFilters]="true"
+            [trackBy]="trackByProduct"
             [enableVirtualScroll]="isVirtualScroll()"
             [virtualRowHeight]="48"
-            [enableDrag]="enableDrag()"
+            [virtualScrollBuffer]="10"
             [enableRowStripes]="enableRowStripes()"
             [fitContent]="fitContent()"
             [enableWordWrap]="enableWordWrap()"
+            [enableDrag]="enableDrag() && !isVirtualScroll()"
+            [expandedRowTemplate]="(enableExpansion() && !isVirtualScroll()) ? rowDetailTpl : null"
+            [isLoading]="isLoading()"
+            [hasMoreData]="hasMoreData()"
+            [loadMoreRows]="loadMoreRows"
             [isRowSelected]="enableSelection() ? isRowSelected : undefined"
-            [expandedRowTemplate]="enableExpansion() && !isVirtualScroll() ? rowDetailTpl : null"
-            [emptyText]="'No products match your filters'"
-            (sortChanged)="onSortChange($event)"
             (rowSelected)="onRowSelected($event)"
             (allRowsSelected)="onAllRowsSelected($event)"
-            (rowDropped)="onRowDropped($event)">
+            (sortChanged)="onSortChange($event)"
+            (rowDropped)="onRowDropped($event)"
+            ariaLabel="Products Inventory Table">
 
-            <!-- ID Column (sticky left, not resizable) -->
+            <!-- ── Column 1: ID (Sticky Left) ────────────────────────────────── -->
             <ng-template
                 ngxInfiniteScrollColumn
                 title="ID"
                 dataKey="id"
-                width="72px"
+                width="70px"
                 textAlign="center"
                 [sticky]="true"
-                [resizable]="false"
                 let-row>
                 <span class="id-badge">#{{ row.id }}</span>
             </ng-template>
 
-            <!-- Product Name with Text Filter -->
+            <!-- ── Column 2: Product Name (Text Filter) ──────────────────────── -->
             <ng-template
                 ngxInfiniteScrollColumn
                 title="Product Name"
@@ -194,7 +195,7 @@
                 </div>
             </ng-template>
 
-            <!-- Category with Single Select Filter -->
+            <!-- ── Column 3: Category (Single-Select Filter) ─────────────────── -->
             <ng-template
                 ngxInfiniteScrollColumn
                 title="Category"
@@ -205,24 +206,24 @@
                 <span class="category-chip">{{ row.category }}</span>
             </ng-template>
 
-            <!-- Price with Currency Filter -->
+            <!-- ── Column 4: Price (Currency Filter) ─────────────────────────── -->
             <ng-template
                 ngxInfiniteScrollColumn
-                title="Price"
+                title="Price ($)"
                 dataKey="price"
-                width="110px"
+                width="120px"
                 textAlign="right"
                 [filterTemplate]="priceFilterTpl"
                 let-row>
                 <span class="price-text">${{ row.price.toFixed(2) }}</span>
             </ng-template>
 
-            <!-- Stock with Numeric Filter -->
+            <!-- ── Column 5: Stock (Numeric Filter & Mini-Bar) ───────────────── -->
             <ng-template
                 ngxInfiniteScrollColumn
                 title="Stock"
                 dataKey="stock"
-                width="100px"
+                width="110px"
                 textAlign="right"
                 [filterTemplate]="stockFilterTpl"
                 let-row>
@@ -232,12 +233,12 @@
                 </div>
             </ng-template>
 
-            <!-- In Stock with Boolean Filter -->
+            <!-- ── Column 6: Status (Boolean Filter Pill) ────────────────────── -->
             <ng-template
                 ngxInfiniteScrollColumn
                 title="Status"
                 dataKey="inStock"
-                width="110px"
+                width="115px"
                 textAlign="center"
                 [filterTemplate]="inStockFilterTpl"
                 let-row>
@@ -246,7 +247,7 @@
                 </span>
             </ng-template>
 
-            <!-- Date Added -->
+            <!-- ── Column 7: Date Added (Standard Text) ──────────────────────── -->
             <ng-template
                 ngxInfiniteScrollColumn
                 title="Date Added"
@@ -257,12 +258,12 @@
                 {{ row.createdDate }}
             </ng-template>
 
-            <!-- Rating (sticky right, no filter) -->
+            <!-- ── Column 8: Rating (Sticky Right) ───────────────────────────── -->
             <ng-template
                 ngxInfiniteScrollColumn
                 title="Rating"
                 dataKey="rating"
-                width="90px"
+                width="95px"
                 textAlign="center"
                 [stickyEnd]="true"
                 let-row>
@@ -271,71 +272,73 @@
         </ngx-virtual-infinite-table>
     </main>
 
-    <!-- ── Feature Callouts ────────────────────────────────────────────────── -->
+    <!-- ── Feature Documentation & Architectural Callouts ──────────────────── -->
     <section class="features-grid">
+        <div class="feature-card">
+            <mat-icon>bolt</mat-icon>
+            <h3>Virtualized Infinite</h3>
+            <p>Combines progressive chunk paging with CDK Virtual Scrolling to handle 5,000+ rows with only ~25 DOM nodes.</p>
+        </div>
+        <div class="feature-card">
+            <mat-icon>memory</mat-icon>
+            <h3>Web Worker Filtering</h3>
+            <p>Offloads dataset filtering and multi-column sorting to a background Web Worker for zero UI thread stutter.</p>
+        </div>
+        <div class="feature-card">
+            <mat-icon>speed</mat-icon>
+            <h3>TrackBy Optimization</h3>
+            <p>Unique scalar row key tracking reuses DOM nodes, eliminating garbage collection spikes and layout thrashing.</p>
+        </div>
         <div class="feature-card">
             <mat-icon>swap_vert</mat-icon>
             <h3>Column Sorting</h3>
-            <p>Click any column header to cycle Desc → Asc → None. Pre-sort via <code>preSortDirection</code>.</p>
+            <p>Click any column header to cycle Desc → Asc → None. Synchronized with Web Worker background sorter.</p>
         </div>
         <div class="feature-card">
             <mat-icon>filter_alt</mat-icon>
             <h3>Column Filters</h3>
-            <p>Text, numeric range, currency, date range, boolean, single-select &amp; multi-select overlays.</p>
+            <p>Text, numeric range, currency, date range, boolean, and single-select overlay panels.</p>
         </div>
         <div class="feature-card">
             <mat-icon>view_column</mat-icon>
             <h3>Column Visibility</h3>
-            <p>Show or hide any column at runtime with <code>hideColumn(key)</code> / <code>showColumn(key)</code>. Build your own picker UI.</p>
+            <p>Show or hide any column at runtime with <code>hideColumn(key)</code> / <code>showColumn(key)</code>.</p>
         </div>
         <div class="feature-card">
             <mat-icon>width_normal</mat-icon>
             <h3>Column Resizing</h3>
-            <p>Drag the right edge of any header to resize. Persists per session. Reset with <code>resetColumnWidths()</code>.</p>
+            <p>Drag the right edge of any header to resize. Persists per session with <code>resetColumnWidths()</code>.</p>
         </div>
         <div class="feature-card">
             <mat-icon>push_pin</mat-icon>
-            <h3>Sticky Columns</h3>
-            <p>Pin columns to the left (<code>[sticky]="true"</code>) or right (<code>[stickyEnd]="true"</code>) edge while the center scrolls.</p>
+            <h3>Sticky Columns & Headers</h3>
+            <p>Pin columns to the left (<code>[sticky]="true"</code>) or right (<code>[stickyEnd]="true"</code>) edges.</p>
         </div>
         <div class="feature-card">
             <mat-icon>expand_more</mat-icon>
-            <h3>Expandable Rows</h3>
-            <p>Master-detail accordions. Programmatically expand/collapse all via <code>expandAllRows()</code> / <code>collapseAllRows()</code>.</p>
+            <h3>Expandable Detail Rows</h3>
+            <p>Master-detail accordions with smooth height transitions and programmatic <code>expandAllRows()</code>.</p>
         </div>
         <div class="feature-card">
             <mat-icon>checklist</mat-icon>
             <h3>Row Selection</h3>
-            <p>Per-row checkboxes with selectAll, indeterminate state. Disable individual rows with <code>isRowSelectable</code>.</p>
+            <p>Per-row checkboxes with selectAll, indeterminate state, and custom selectable validators.</p>
         </div>
         <div class="feature-card">
             <mat-icon>drag_indicator</mat-icon>
             <h3>Drag & Drop Reorder</h3>
-            <p>CDK-powered row reordering. Toggle with the DnD button above.</p>
-        </div>
-        <div class="feature-card">
-            <mat-icon>speed</mat-icon>
-            <h3>Virtual Scroll</h3>
-            <p>CDK virtual scroll renders 5,000+ rows with a tiny DOM. Toggle to see the difference.</p>
-        </div>
-        <div class="feature-card">
-            <mat-icon>travel_explore</mat-icon>
-            <h3>Seek to Row</h3>
-            <p>Jump to any row index — even un-fetched pages — via <code>scrollToRow(index)</code>.</p>
+            <p>CDK-powered smooth row reordering with position persistence.</p>
         </div>
         <div class="feature-card">
             <mat-icon>download</mat-icon>
             <h3>CSV Export</h3>
-            <p>Zero-dependency <code>exportToCsv()</code> utility with custom formatters and filename.</p>
-        </div>
-        <div class="feature-card">
-            <mat-icon>accessibility</mat-icon>
-            <h3>Keyboard & a11y</h3>
-            <p>Focusable rows with <code>tabindex</code>, <code>aria-selected</code>, Space/Enter keyboard triggers.</p>
+            <p>Zero-dependency <code>exportToCsv()</code> utility with custom value formatters.</p>
         </div>
     </section>
 
-    <!-- ── Filter Templates ────────────────────────────────────────────────── -->
+    <!-- ── Reusable Column Filter Templates ────────────────────────────────── -->
+
+    <!-- Text Filter Template (Product Name) -->
     <ng-template #titleFilterTpl>
         <ngx-virtual-infinite-table-filter
             dataKey="title"
@@ -346,6 +349,7 @@
             (filterChanged)="onFilterChange($event)" />
     </ng-template>
 
+    <!-- Single-Select Filter Template (Category) -->
     <ng-template #categoryFilterTpl>
         <ngx-virtual-infinite-table-filter
             dataKey="category"
@@ -359,6 +363,7 @@
             (filterChanged)="onFilterChange($event)" />
     </ng-template>
 
+    <!-- Currency Filter Template (Price) -->
     <ng-template #priceFilterTpl>
         <ngx-virtual-infinite-table-filter
             dataKey="price"
@@ -369,6 +374,7 @@
             (filterChanged)="onFilterChange($event)" />
     </ng-template>
 
+    <!-- Numeric Range Filter Template (Stock) -->
     <ng-template #stockFilterTpl>
         <ngx-virtual-infinite-table-filter
             dataKey="stock"
@@ -379,6 +385,7 @@
             (filterChanged)="onFilterChange($event)" />
     </ng-template>
 
+    <!-- Boolean Filter Template (In Stock) -->
     <ng-template #inStockFilterTpl>
         <ngx-virtual-infinite-table-filter
             dataKey="inStock"
@@ -389,7 +396,7 @@
             (filterChanged)="onFilterChange($event)" />
     </ng-template>
 
-    <!-- Expandable Row Detail Template -->
+    <!-- Expandable Row Detail Template (Master-Detail Accordion) -->
     <ng-template #rowDetailTpl let-item>
         <div class="row-detail-content">
             <div class="detail-header">

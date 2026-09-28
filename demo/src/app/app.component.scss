@@ -1,36 +1,11 @@
-
-:host {
-    display: block;
-    font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
-}
-
-// ── Dark-mode theme layer ────────────────────────────────────────────────────
-.dark-theme, .dark {
-    --mat-sys-surface: #1c1b1f;
-    --mat-sys-surface-container: #211f26;
-    --mat-sys-surface-container-high: #2b2930;
-    --mat-sys-surface-container-highest: #36343b;
-    --mat-sys-surface-variant: #49454f;
-    --mat-sys-on-surface: #e6e1e5;
-    --mat-sys-on-surface-variant: #cac4d0;
-    --mat-sys-outline: #938f99;
-    --mat-sys-outline-variant: #49454f;
-    --mat-sys-primary: #d0bcff;
-    --mat-sys-on-primary: #381e72;
-    --mat-sys-tertiary-container: #633b48;
-    --mat-sys-inverse-on-surface: #1c1b1f;
-    color: var(--mat-sys-on-surface, #e6e1e5);
-    background: var(--mat-sys-surface, #1c1b1f);
-}
-
-// ── Layout ───────────────────────────────────────────────────────────────────
+// ── Variables & Mixins ────────────────────────────────────────────────────────
 .demo-container {
     min-height: 100vh;
     display: flex;
     flex-direction: column;
-    background: var(--mat-sys-surface, #f6f5f7);
+    background-color: var(--mat-sys-surface, #fbf8fd);
     color: var(--mat-sys-on-surface, #1d1b20);
-    transition: background 0.3s ease, color 0.3s ease;
+    transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 // ── Header ───────────────────────────────────────────────────────────────────
@@ -39,17 +14,13 @@
     align-items: center;
     justify-content: space-between;
     padding: 16px 24px;
-    background: var(--mat-sys-surface-container-high, #ece6f0);
+    background: var(--mat-sys-surface-container, #f3edf7);
     border-bottom: 1px solid var(--mat-sys-outline-variant, #cac4d0);
-    position: sticky;
-    top: 0;
-    z-index: 100;
-    gap: 16px;
 
     .header-left {
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 16px;
 
         .logo-icon {
             font-size: 32px;
@@ -60,14 +31,14 @@
 
         h1 {
             margin: 0;
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 700;
             letter-spacing: -0.3px;
         }
 
         .subtitle {
-            margin: 0;
-            font-size: 12px;
+            margin: 2px 0 0;
+            font-size: 13px;
             color: var(--mat-sys-on-surface-variant, #49454f);
         }
     }
@@ -76,35 +47,33 @@
         display: flex;
         align-items: center;
         gap: 8px;
-        flex-shrink: 0;
     }
 }
 
-// ── Toolbar ───────────────────────────────────────────────────────────────────
+// ── Sticky Toolbar ───────────────────────────────────────────────────────────
 .demo-toolbar {
+    position: sticky;
+    top: 0;
+    z-index: 10;
     display: flex;
     flex-wrap: wrap;
-    gap: 12px 24px;
     align-items: center;
-    padding: 12px 24px;
-    background: var(--mat-sys-surface-container, #f3edf7);
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 24px;
+    background: var(--mat-sys-surface-container-high, #ece6f0);
     border-bottom: 1px solid var(--mat-sys-outline-variant, #cac4d0);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 
     .toolbar-group {
         display: flex;
-        flex-wrap: wrap;
         align-items: center;
         gap: 12px;
-
-        &:not(:last-child) {
-            padding-right: 24px;
-            border-right: 1px solid var(--mat-sys-outline-variant, #cac4d0);
-        }
     }
 
     .mode-group {
         .mode-toggle-group {
-            border-radius: 20px;
+            border-radius: 8px;
             overflow: hidden;
             border: 1px solid var(--mat-sys-outline, #79747e);
             background: var(--mat-sys-surface, #ffffff);
@@ -190,6 +159,7 @@
     background: var(--mat-sys-surface-container, #f3edf7);
     font-size: 12px;
     align-items: center;
+    border-bottom: 1px solid var(--mat-sys-outline-variant, #cac4d0);
 }
 
 .status-chip {
@@ -230,7 +200,7 @@
     }
 }
 
-// ── Table Card ────────────────────────────────────────────────────────────────
+// ── Table Container Card ──────────────────────────────────────────────────────
 .table-card {
     flex: 1;
     display: flex;
@@ -239,7 +209,7 @@
     border-radius: 12px;
     overflow: hidden;
     border: 1px solid var(--mat-sys-outline-variant, #cac4d0);
-    height: 540px;
+    height: 560px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
 
     ngx-virtual-infinite-table,
@@ -250,7 +220,7 @@
     }
 }
 
-// ── Cell Styles ───────────────────────────────────────────────────────────────
+// ── Custom Cell Styles ────────────────────────────────────────────────────────
 .id-badge {
     display: inline-block;
     font-family: 'Courier New', monospace;
@@ -330,7 +300,7 @@
     color: #f59e0b;
 }
 
-// ── Expanded Row Detail ───────────────────────────────────────────────────────
+// ── Expanded Detail Content ───────────────────────────────────────────────────
 .row-detail-content {
     display: flex;
     flex-direction: column;
@@ -378,7 +348,7 @@
     }
 }
 
-// ── Feature Grid ─────────────────────────────────────────────────────────────
+// ── Feature Documentation Grid ────────────────────────────────────────────────
 .features-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
@@ -394,10 +364,11 @@
     border-radius: 12px;
     background: var(--mat-sys-surface-container, #f3edf7);
     border: 1px solid var(--mat-sys-outline-variant, #cac4d0);
-    transition: box-shadow 0.2s ease;
+    transition: box-shadow 0.2s ease, transform 0.2s ease;
 
     &:hover {
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.10);
+        transform: translateY(-2px);
     }
 
     mat-icon {

@@ -399,7 +399,7 @@
 
 // Dark Mode Support
 :host-context(.dark),
-.dark & {
+:host-context(.dark) {
     .filter-overlay-panel {
         background-color: var(--mat-sys-surface-container-highest, #36343b);
         color: var(--mat-sys-on-surface, #e6e1e5);

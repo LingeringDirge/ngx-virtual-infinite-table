@@ -27,17 +27,11 @@ jobs:
         with:
           node-version: 20
 
-      - name: Install Root Dependencies
-        run: npm install
-
-      - name: Build Library
-        run: npm run build
-
       - name: Install Demo Dependencies
         run: cd demo && npm install
 
-      - name: Build Demo
-        run: cd demo && npm run build
+      - name: Build Demo Application
+        run: cd demo && npx ng build --base-href /ngx-virtual-infinite-table/
 
       - name: Upload GitHub Pages Artifact
         uses: actions/upload-pages-artifact@v3

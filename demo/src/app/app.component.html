@@ -325,7 +325,7 @@
             dataKey="title"
             columnName="Product Name"
             type="text"
-            [scrollTable]="table()"
+            [scrollTable]="table"
             [filterValue]="activeFilters()['title']"
             (filterChanged)="onFilterChange($event)" />
     </ng-template>
@@ -335,7 +335,7 @@
             dataKey="category"
             columnName="Category"
             type="singleselect"
-            [scrollTable]="table()"
+            [scrollTable]="table"
             [filterValue]="{
                 options: ['Electronics', 'Home & Kitchen', 'Books', 'Clothing', 'Sports', 'Automotive', 'Health & Beauty'],
                 singleselect: activeFilters()['category']?.['singleselect']
@@ -348,7 +348,7 @@
             dataKey="price"
             columnName="Price"
             type="currency"
-            [scrollTable]="table()"
+            [scrollTable]="table"
             [filterValue]="activeFilters()['price']"
             (filterChanged)="onFilterChange($event)" />
     </ng-template>
@@ -358,7 +358,7 @@
             dataKey="stock"
             columnName="Stock"
             type="numeric"
-            [scrollTable]="table()"
+            [scrollTable]="table"
             [filterValue]="activeFilters()['stock']"
             (filterChanged)="onFilterChange($event)" />
     </ng-template>
@@ -368,7 +368,7 @@
             dataKey="inStock"
             columnName="Availability"
             type="boolean"
-            [scrollTable]="table()"
+            [scrollTable]="table"
             [filterValue]="activeFilters()['inStock']"
             (filterChanged)="onFilterChange($event)" />
     </ng-template>

@@ -26,7 +26,7 @@ export interface IFilterHostTable {
  * Supports text, numeric range, currency range, date range, boolean, single-select, and multi-select filters.
  */
 @Component({
-    selector: 'ngx-infinite-scroll-table-filter, infinite-scroll-table-filter, app-infinite-scroll-table-filter',
+    selector: 'ngx-virtual-infinite-table-filter, ngx-infinite-scroll-table-filter, infinite-scroll-table-filter, app-infinite-scroll-table-filter',
     templateUrl: './infinite-scroll-table-filter.component.html',
     styleUrls: ['./infinite-scroll-table-filter.component.scss'],
     standalone: true,

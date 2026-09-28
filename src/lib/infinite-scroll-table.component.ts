@@ -56,7 +56,7 @@ import { IsRowExpandedPipe } from './pipes/is-row-expanded.pipe';
  * drag-and-drop reordering, and expandable master-detail rows.
  */
 @Component({
-    selector: 'ngx-infinite-scroll-table, infinite-scroll-table, app-infinite-scroll-table',
+    selector: 'ngx-virtual-infinite-table, ngx-infinite-scroll-table, infinite-scroll-table, app-infinite-scroll-table',
     templateUrl: './infinite-scroll-table.component.html',
     styleUrls: ['./infinite-scroll-table.component.scss'],
     providers: [

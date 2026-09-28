@@ -59,7 +59,7 @@ const ALL_COLUMNS = ['ID', 'Product Name', 'Category', 'Price', 'Stock', 'Status
     styleUrls: ['./app.component.scss']
 })
 export class AppComponent implements OnInit {
-    public table = viewChild<InfiniteScrollTableComponent>('table');
+    public table = viewChild(InfiniteScrollTableComponent);
 
     // ── Feature Toggles ────────────────────────────────────────────────────
     public isVirtualScroll = signal(false);

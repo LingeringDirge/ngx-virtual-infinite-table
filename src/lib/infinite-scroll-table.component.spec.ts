@@ -184,4 +184,45 @@ describe('InfiniteScrollTableComponent', () => {
         const mockCol = { title: 'ID', dataKey: 'id' } as any;
         expect(component.getColumnWidth(mockCol, 0)).toBeUndefined();
     });
+    it('should correctly populate virtualVisibleItems when swapping from non-virtual to virtual mode', async () => {
+        fixture.componentRef.setInput('enableVirtualScroll', false);
+        fixture.componentRef.setInput('items', [{ id: 1 }, { id: 2 }]);
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        expect(component.effectiveVirtualScroll()).toBe(false);
+
+        // Swap to virtual mode
+        fixture.componentRef.setInput('enableVirtualScroll', true);
+        fixture.componentRef.setInput('items', [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }]);
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        console.log('virtualVisibleItems length:', component.virtualVisibleItems().length);
+        console.log('virtualViewport:', !!component.virtualViewport);
+        console.log('renderedRange:', component.virtualViewport?.getRenderedRange());
+    });
+    it('should correctly populate virtualVisibleItems when swapping from non-virtual to virtual mode with async data load', async () => {
+        fixture.componentRef.setInput('enableVirtualScroll', false);
+        fixture.componentRef.setInput('items', [{ id: 1 }, { id: 2 }]);
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        // Simulate toggleVirtualMode: sets displayedProducts to [] and enables virtual scroll
+        fixture.componentRef.setInput('enableVirtualScroll', true);
+        fixture.componentRef.setInput('items', []);
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        console.log('Immediately after toggle with empty items:', component.virtualVisibleItems().length);
+
+        // Simulate async load 50ms later:
+        fixture.componentRef.setInput('items', [{ id: 1 }, { id: 2 }, { id: 3 }, { id: 4 }]);
+        fixture.detectChanges();
+        await fixture.whenStable();
+
+        console.log('After async items load:', component.virtualVisibleItems().length);
+        console.log('virtualViewport:', !!component.virtualViewport);
+        console.log('renderedRange:', component.virtualViewport?.getRenderedRange());
+    });
 });

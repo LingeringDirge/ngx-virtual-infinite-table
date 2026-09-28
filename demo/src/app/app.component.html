@@ -13,7 +13,7 @@
             <button mat-icon-button (click)="toggleDarkMode()" [matTooltip]="isDarkMode() ? 'Light mode' : 'Dark mode'">
                 <mat-icon>{{ isDarkMode() ? 'light_mode' : 'dark_mode' }}</mat-icon>
             </button>
-            <a mat-stroked-button href="https://github.com/LingeringDirge/ngx-virtual-infinite-table" target="_blank">
+            <a mat-stroked-button href="https://github.com/LingeringDirge/ngx-virtual-infinite-table" target="_blank" matTooltip="View source on GitHub">
                 <mat-icon>code</mat-icon>
                 GitHub
             </a>
@@ -23,29 +23,40 @@
     <!-- ── Toolbar ─────────────────────────────────────────────────────────── -->
     <section class="demo-toolbar">
 
-        <!-- Group 1: Scroll & Layout -->
-        <div class="toolbar-group">
-            <mat-slide-toggle [checked]="isVirtualScroll()" (change)="toggleVirtualMode()" color="primary">
-                {{ isVirtualScroll() ? 'Virtual Scroll (5,000 rows)' : 'Infinite Scroll (paged)' }}
-            </mat-slide-toggle>
-            <mat-slide-toggle [(ngModel)]="enableRowStripes" color="primary">Stripes</mat-slide-toggle>
-            <mat-slide-toggle [(ngModel)]="fitContent" color="primary">Fit Content</mat-slide-toggle>
-            <mat-slide-toggle [(ngModel)]="enableWordWrap" color="primary">Word Wrap</mat-slide-toggle>
+        <!-- Mode Toggle Segmented Button -->
+        <div class="toolbar-group mode-group">
+            <mat-button-toggle-group
+                [value]="isVirtualScroll() ? 'virtual' : 'infinite'"
+                (change)="onModeChange($event.value)"
+                class="mode-toggle-group"
+                aria-label="Table scrolling mode">
+                <mat-button-toggle value="virtual" matTooltip="Virtual scrolling: ultra high performance for large datasets (5,000 rows)">
+                    <mat-icon class="toggle-icon">bolt</mat-icon>
+                    <span>Virtual Scroll (5k rows)</span>
+                </mat-button-toggle>
+                <mat-button-toggle value="infinite" matTooltip="Infinite scrolling: loads pages sequentially as you scroll near bottom">
+                    <mat-icon class="toggle-icon">all_inclusive</mat-icon>
+                    <span>Infinite Scroll (paged)</span>
+                </mat-button-toggle>
+            </mat-button-toggle-group>
         </div>
 
-        <!-- Group 2: Features -->
+        <!-- Layout Controls -->
         <div class="toolbar-group">
-            <mat-slide-toggle [(ngModel)]="enableSelection" color="primary">Row Selection</mat-slide-toggle>
+            <mat-slide-toggle [(ngModel)]="enableRowStripes" color="primary" matTooltip="Toggle alternating row stripe background">Stripes</mat-slide-toggle>
+            <mat-slide-toggle [(ngModel)]="fitContent" color="primary" matTooltip="Fit table to column widths instead of 100% stretch">Fit Content</mat-slide-toggle>
+            <mat-slide-toggle [(ngModel)]="enableWordWrap" color="primary" matTooltip="Wrap cell text onto multiple lines instead of single-line truncation">Word Wrap</mat-slide-toggle>
+            <mat-slide-toggle [(ngModel)]="enableSelection" color="primary" matTooltip="Enable row selection checkboxes">Row Selection</mat-slide-toggle>
             @if (!isVirtualScroll()) {
-                <mat-slide-toggle [(ngModel)]="enableDrag" color="primary">DnD Reorder</mat-slide-toggle>
-                <mat-slide-toggle [(ngModel)]="enableExpansion" color="primary">Expand Rows</mat-slide-toggle>
+                <mat-slide-toggle [(ngModel)]="enableDrag" color="primary" matTooltip="Drag & drop rows to reorder them">DnD Reorder</mat-slide-toggle>
+                <mat-slide-toggle [(ngModel)]="enableExpansion" color="primary" matTooltip="Expand rows for detailed specs">Expand Rows</mat-slide-toggle>
             }
         </div>
 
-        <!-- Group 3: Actions -->
+        <!-- Actions -->
         <div class="toolbar-group actions-group">
             <!-- Column Picker -->
-            <button mat-stroked-button [matMenuTriggerFor]="colMenu">
+            <button mat-stroked-button [matMenuTriggerFor]="colMenu" matTooltip="Configure column visibility and reset widths">
                 <mat-icon>view_column</mat-icon>
                 Columns
             </button>
@@ -62,41 +73,43 @@
                 </button>
             </mat-menu>
 
-            <!-- Seek -->
-            <div class="seek-box">
-                <input type="number" [(ngModel)]="seekRowIndex" placeholder="Row #" min="0" />
-                <button mat-flat-button color="primary" (click)="triggerSeek()">
-                    Seek to Row
+            <!-- Material Outline Seek Input -->
+            <mat-form-field appearance="outline" subscriptSizing="dynamic" class="seek-form-field" matTooltip="Jump directly to any row index">
+                <mat-icon matPrefix class="seek-prefix-icon">search</mat-icon>
+                <mat-label>Go to Row</mat-label>
+                <input matInput type="number" [(ngModel)]="seekRowIndex" min="0" max="5000" (keydown.enter)="triggerSeek()" />
+                <button mat-icon-button matSuffix (click)="triggerSeek()" [matTooltip]="'Scroll directly to row #' + seekRowIndex()" aria-label="Seek to row">
+                    <mat-icon>arrow_forward</mat-icon>
                 </button>
-            </div>
+            </mat-form-field>
 
             <!-- Expand/Collapse all -->
             @if (enableExpansion() && !isVirtualScroll()) {
-                <button mat-stroked-button (click)="expandAll()">
+                <button mat-stroked-button (click)="expandAll()" matTooltip="Expand all product details">
                     <mat-icon>unfold_more</mat-icon>
                     Expand All
                 </button>
-                <button mat-stroked-button (click)="collapseAll()">
+                <button mat-stroked-button (click)="collapseAll()" matTooltip="Collapse all product details">
                     <mat-icon>unfold_less</mat-icon>
                     Collapse All
                 </button>
             }
 
             <!-- CSV Export -->
-            <button mat-stroked-button (click)="exportCsv()">
+            <button mat-stroked-button (click)="exportCsv()" matTooltip="Export visible table data to CSV file">
                 <mat-icon>download</mat-icon>
                 Export CSV
             </button>
 
             <!-- Clear Selection -->
             @if (selectedRowIds().size > 0) {
-                <button mat-stroked-button (click)="clearSelection()">
+                <button mat-stroked-button color="warn" (click)="clearSelection()" matTooltip="Deselect all selected rows">
                     <mat-icon>deselect</mat-icon>
-                    Clear Selection
+                    Clear ({{ selectedRowIds().size }})
                 </button>
             }
 
-            <button mat-stroked-button (click)="resetAndLoad()">
+            <button mat-stroked-button (click)="resetAndLoad()" matTooltip="Reset filters, sorting, and reload initial dataset">
                 <mat-icon>refresh</mat-icon>
                 Reset
             </button>
@@ -105,25 +118,25 @@
 
     <!-- ── Status Bar ──────────────────────────────────────────────────────── -->
     <div class="status-bar">
-        <span class="status-chip">
+        <span class="status-chip" matTooltip="Total rows currently loaded in dataset">
             <strong>Loaded:</strong>&nbsp;{{ displayedProducts().length }} / 5,000 rows
         </span>
         @if (selectedRowIds().size > 0) {
-            <span class="status-chip highlight">
+            <span class="status-chip highlight" matTooltip="Number of selected rows">
                 <strong>Selected:</strong>&nbsp;{{ selectedRowIds().size }} rows
             </span>
         }
         @if (sortField()) {
-            <span class="status-chip">
+            <span class="status-chip" matTooltip="Current sort column and direction">
                 <strong>Sort:</strong>&nbsp;{{ sortField() }} ({{ sortDirection() === 1 ? 'Asc' : 'Desc' }})
             </span>
         }
         @if (hiddenColumnSet().size > 0) {
-            <span class="status-chip muted">
+            <span class="status-chip muted" matTooltip="Number of hidden columns">
                 <strong>Hidden cols:</strong>&nbsp;{{ hiddenColumnSet().size }}
             </span>
         }
-        <span class="status-chip hint">
+        <span class="status-chip hint" matTooltip="Hover near column header borders and drag to resize">
             <mat-icon class="hint-icon">drag_indicator</mat-icon>
             Drag column edges to resize
         </span>

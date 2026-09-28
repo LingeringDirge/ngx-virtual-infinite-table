@@ -102,29 +102,81 @@
         }
     }
 
+    .mode-group {
+        .mode-toggle-group {
+            border-radius: 20px;
+            overflow: hidden;
+            border: 1px solid var(--mat-sys-outline, #79747e);
+            background: var(--mat-sys-surface, #ffffff);
+
+            mat-button-toggle {
+                font-size: 13px;
+                font-weight: 500;
+
+                .toggle-icon {
+                    font-size: 18px;
+                    width: 18px;
+                    height: 18px;
+                    line-height: 18px;
+                    margin-right: 4px;
+                    vertical-align: text-bottom;
+                }
+
+                &.mat-button-toggle-checked {
+                    background-color: var(--mat-sys-primary, #6750a4);
+                    color: var(--mat-sys-on-primary, #ffffff);
+
+                    .toggle-icon {
+                        color: var(--mat-sys-on-primary, #ffffff);
+                    }
+                }
+            }
+        }
+    }
+
     .actions-group {
         flex-wrap: wrap;
         gap: 8px;
     }
-}
 
-.seek-box {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-
-    input[type='number'] {
-        width: 80px;
-        padding: 6px 10px;
-        border: 1px solid var(--mat-sys-outline, #79747e);
-        border-radius: 6px;
-        background: var(--mat-sys-surface, #fff);
-        color: var(--mat-sys-on-surface, #1d1b20);
+    .seek-form-field {
+        width: 165px;
         font-size: 13px;
-        outline: none;
 
-        &:focus {
-            border-color: var(--mat-sys-primary, #6750a4);
+        ::ng-deep .mat-mdc-text-field-wrapper {
+            padding: 0 8px;
+            border-radius: 8px;
+        }
+
+        ::ng-deep .mat-mdc-form-field-infix {
+            padding-top: 4px;
+            padding-bottom: 4px;
+            min-height: 38px;
+        }
+
+        .seek-prefix-icon {
+            font-size: 18px;
+            width: 18px;
+            height: 18px;
+            color: var(--mat-sys-on-surface-variant, #49454f);
+            margin-right: 4px;
+        }
+
+        input {
+            font-weight: 500;
+        }
+
+        button[matSuffix] {
+            width: 28px;
+            height: 28px;
+            line-height: 28px;
+
+            mat-icon {
+                font-size: 18px;
+                width: 18px;
+                height: 18px;
+                line-height: 18px;
+            }
         }
     }
 }
@@ -183,9 +235,11 @@
     height: 540px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
 
+    ngx-virtual-infinite-table,
     ngx-infinite-scroll-table {
         flex: 1;
         height: 100%;
+        display: block;
     }
 }
 

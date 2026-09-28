@@ -404,15 +404,17 @@
 }
 
 // CDK Connected Overlay Panel for Column Filters
-.filter-overlay-panel {
-    background-color: var(--mat-sys-surface, #ffffff);
-    border: 1px solid var(--mat-sys-outline, #79747e);
+::ng-deep .filter-overlay-panel {
+    background-color: var(--mat-sys-surface, #ffffff) !important;
+    color: var(--mat-sys-on-surface, #1e293b) !important;
+    border: 1px solid var(--mat-sys-outline, #cbd5e1);
     border-radius: 8px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1) !important;
     padding: 12px;
     min-width: 280px;
     max-width: 420px;
     z-index: 1000;
+    opacity: 1 !important;
 }
 
 // CDK Drag & Drop Preview
@@ -439,9 +441,11 @@
 // Dark Mode Support
 :host-context(.dark),
 :host-context(.dark-theme) {
-    .filter-overlay-panel {
-        background-color: var(--mat-sys-surface-container-highest, #36343b);
-        color: var(--mat-sys-on-surface, #e6e1e5);
+    ::ng-deep .filter-overlay-panel {
+        background-color: var(--mat-sys-surface-container-highest, #334155) !important;
+        color: var(--mat-sys-on-surface, #f8fafc) !important;
+        border-color: var(--mat-sys-outline, #475569);
+        box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5) !important;
     }
 
     .enable-row-stripes {

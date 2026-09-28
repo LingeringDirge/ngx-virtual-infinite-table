@@ -13,6 +13,7 @@
                     class="header-button"
                     [inline]="true"
                     [fontIcon]="getColumnSortIcon(column)"
+                    [matTooltip]="'Sort by ' + column?.title"
                     (click)="sortColumn(column)" />
             }
             @if (!!enableFilters() && column.filterTemplate) {
@@ -21,6 +22,7 @@
                     cdkOverlayOrigin
                     #filterOrigin="cdkOverlayOrigin"
                     (click)="toggleFilterDisplay($event, column)"
+                    [matTooltip]="'Filter ' + column?.title"
                     [inline]="true">
                     filter_alt
                 </mat-icon>

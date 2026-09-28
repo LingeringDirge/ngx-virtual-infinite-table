@@ -87,9 +87,21 @@ export class VirtualScrollController<T = unknown> {
         this.config.strategy.updateItemSize(this.measuredRowHeight ?? this.config.getVirtualRowHeight());
         this.config.strategy.updateBufferSize(this.config.getVirtualScrollBuffer());
 
-        const range = viewport?.getRenderedRange();
-        if (range) {
+        const activeViewport = viewport ?? this.viewport ?? undefined;
+        const range = activeViewport?.getRenderedRange();
+        if (range && (range.start !== 0 || range.end !== 0)) {
             this.config.visibleItems.set(items.slice(range.start, range.end));
+        } else if (items.length > 0) {
+            const vpHeight = activeViewport?.getViewportSize() || 500;
+            const visibleCount = Math.ceil(vpHeight / this.effectiveItemSize);
+            const buffer = this.config.getVirtualScrollBuffer();
+            const fallbackEnd = Math.min(items.length, visibleCount + buffer);
+            this.config.visibleItems.set(items.slice(0, fallbackEnd));
+            if (activeViewport) {
+                activeViewport.setRenderedRange({ start: 0, end: fallbackEnd });
+            }
+        } else {
+            this.config.visibleItems.set([]);
         }
 
         this.scheduleWidthSync();
@@ -102,6 +114,28 @@ export class VirtualScrollController<T = unknown> {
 
         this.viewport = viewport;
         this.headerWrapper = headerWrapper ?? null;
+
+        // Ensure strategy is attached to the viewport and size is calculated
+        this.config.strategy.attach(viewport);
+        viewport?.checkViewportSize?.();
+
+        // Immediately synchronize current items and row dimensions
+        this.syncData(viewport);
+
+        const allItems = this.config.getItems() ?? [];
+        if (allItems.length > 0) {
+            let range = viewport.getRenderedRange();
+            if (!range || range.end === 0) {
+                const vpHeight = viewport.getViewportSize() || 500;
+                const visibleCount = Math.ceil(vpHeight / this.effectiveItemSize);
+                const buffer = this.config.getVirtualScrollBuffer();
+                range = { start: 0, end: Math.min(allItems.length, visibleCount + buffer) };
+                viewport.setRenderedRange(range);
+            }
+            this.config.visibleItems.set(allItems.slice(range.start, range.end));
+            this.config.rangeStart.set(range.start);
+            this.config.cdr.markForCheck();
+        }
 
         this.rangeSub = viewport.renderedRangeStream.pipe(takeUntilDestroyed(this.config.destroyRef)).subscribe((range) => {
             const allItems = this.config.getItems() ?? [];
@@ -136,6 +170,13 @@ export class VirtualScrollController<T = unknown> {
     }
 
     /** Clears timers on destroy. */
+    public detach(): void {
+        this.rangeSub?.unsubscribe();
+        this.scrollSub?.unsubscribe();
+        this.viewport = null;
+        this.headerWrapper = null;
+    }
+
     public destroy(): void {
         this.rangeSub?.unsubscribe();
         this.scrollSub?.unsubscribe();

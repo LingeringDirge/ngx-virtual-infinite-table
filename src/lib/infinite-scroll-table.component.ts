@@ -89,9 +89,11 @@ export class InfiniteScrollTableComponent<T = any>
 
     @ViewChild('virtualViewport')
     public set virtualViewport(vp: CdkVirtualScrollViewport | undefined) {
-        if (vp && vp !== this._virtualViewport) {
-            this._virtualViewport = vp;
+        this._virtualViewport = vp;
+        if (vp) {
             this.virtualCtrl.attach(vp, this.virtualHeaderWrapper);
+        } else {
+            this.virtualCtrl.detach();
         }
     }
 

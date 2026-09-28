@@ -53,6 +53,7 @@ export class TableVirtualScrollStrategy implements VirtualScrollStrategy, OnDest
 
     public attach(viewport: CdkVirtualScrollViewport): void {
         this.viewport = viewport;
+        viewport?.checkViewportSize?.();
         this.onDataLengthChanged();
         this.updateRenderedRange();
     }
@@ -92,7 +93,7 @@ export class TableVirtualScrollStrategy implements VirtualScrollStrategy, OnDest
 
         const scrollOffset = this.viewport.measureScrollOffset();
         const firstVisibleIndex = Math.floor(scrollOffset / this.itemSize);
-        const viewportSize = this.viewport.getViewportSize();
+        const viewportSize = this.viewport.getViewportSize() || 500;
         const visibleRangeCount = Math.ceil(viewportSize / this.itemSize);
 
         const start = Math.max(0, firstVisibleIndex - this.bufferSize);

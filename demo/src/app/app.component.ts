@@ -7,6 +7,9 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatChipsModule } from '@angular/material/chips';
 import { MatIconModule } from '@angular/material/icon';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import {
@@ -50,6 +53,9 @@ const ALL_COLUMNS = ['ID', 'Product Name', 'Category', 'Price', 'Stock', 'Status
         MatMenuModule,
         MatSlideToggleModule,
         MatTooltipModule,
+        MatButtonToggleModule,
+        MatFormFieldModule,
+        MatInputModule,
         InfiniteScrollTableModule
     ],
     templateUrl: './app.component.html',
@@ -124,8 +130,9 @@ export class AppComponent implements OnInit {
         }
     }
 
-    public toggleVirtualMode(): void {
-        const next = !this.isVirtualScroll();
+    public onModeChange(mode: 'virtual' | 'infinite'): void {
+        const next = mode === 'virtual';
+        if (this.isVirtualScroll() === next) return;
         this.isVirtualScroll.set(next);
         if (next) {
             this.enableDrag.set(false);
@@ -136,20 +143,31 @@ export class AppComponent implements OnInit {
         this.resetAndLoad();
     }
 
+    public toggleVirtualMode(): void {
+        this.onModeChange(this.isVirtualScroll() ? 'infinite' : 'virtual');
+    }
+
     // ── Data Operations ────────────────────────────────────────────────────
 
     public resetAndLoad(): void {
+        this.isLoading.set(false);
         this.currentOffset = 0;
         this.selectedRowIds.set(new Set());
         this.hasMoreData.set(true);
-        this.displayedProducts.set([]);
-        this.table()?.resetScrollState();
 
         // Filter and sort ONCE on dataset/filter change (prevents re-filtering 5k items on every page chunk)
         const filtered = this.applyClientSideFilters(this.allMockProducts);
         this.filteredDataset = this.applyClientSideSort(filtered);
 
-        this.loadMoreRows();
+        if (this.isVirtualScroll()) {
+            this.displayedProducts.set(this.filteredDataset);
+            this.hasMoreData.set(false);
+        } else {
+            this.displayedProducts.set(this.filteredDataset.slice(0, this.pageSize));
+            this.currentOffset = this.pageSize;
+            this.hasMoreData.set(this.currentOffset < this.filteredDataset.length);
+        }
+        this.table()?.resetScrollState();
     }
 
     public loadMoreRows = (): void => {

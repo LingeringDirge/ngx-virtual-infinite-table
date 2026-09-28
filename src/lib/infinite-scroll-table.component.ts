@@ -451,6 +451,18 @@ export class InfiniteScrollTableComponent<T = any>
 
     public ngAfterViewInit(): void {
         this.fillCheck.attach();
+        if (this.scrolltable?.nativeElement) {
+            this.ngZone.runOutsideAngular(() => {
+                this.scrolltable?.nativeElement.addEventListener(
+                    "scroll",
+                    () => {
+                        const top = this.scrolltable?.nativeElement?.scrollTop ?? 0;
+                        this.scrollTopChange.emit(top);
+                    },
+                    { passive: true }
+                );
+            });
+        }
     }
 
     public ngOnDestroy(): void {

@@ -103,7 +103,8 @@ export class AppComponent implements OnInit {
     // ── Selection State ────────────────────────────────────────────────────
     public selectedRowIds = signal<Set<number>>(new Set<number>());
 
-    private pageSize = 30;
+    private pageSize = 50;
+    private filteredDataset: ProductItem[] = [];
     private currentOffset = 0;
 
     public ngOnInit(): void {
@@ -143,6 +144,11 @@ export class AppComponent implements OnInit {
         this.hasMoreData.set(true);
         this.displayedProducts.set([]);
         this.table()?.resetScrollState();
+
+        // Filter and sort ONCE on dataset/filter change (prevents re-filtering 5k items on every page chunk)
+        const filtered = this.applyClientSideFilters(this.allMockProducts);
+        this.filteredDataset = this.applyClientSideSort(filtered);
+
         this.loadMoreRows();
     }
 
@@ -151,21 +157,18 @@ export class AppComponent implements OnInit {
         this.isLoading.set(true);
 
         setTimeout(() => {
-            const filtered = this.applyClientSideFilters(this.allMockProducts);
-            const sorted = this.applyClientSideSort(filtered);
-
             if (this.isVirtualScroll()) {
-                this.displayedProducts.set(sorted);
+                this.displayedProducts.set(this.filteredDataset);
                 this.hasMoreData.set(false);
             } else {
-                const nextChunk = sorted.slice(this.currentOffset, this.currentOffset + this.pageSize);
+                const nextChunk = this.filteredDataset.slice(this.currentOffset, this.currentOffset + this.pageSize);
                 this.currentOffset += this.pageSize;
                 this.displayedProducts.update((prev: ProductItem[]) => [...prev, ...nextChunk]);
-                this.hasMoreData.set(this.currentOffset < sorted.length);
+                this.hasMoreData.set(this.currentOffset < this.filteredDataset.length);
             }
 
             this.isLoading.set(false);
-        }, 300);
+        }, 50);
     };
 
     // ── Sort / Filter ──────────────────────────────────────────────────────

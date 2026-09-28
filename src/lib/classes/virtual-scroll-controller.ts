@@ -123,14 +123,16 @@ export class VirtualScrollController<T = unknown> {
             this.scheduleWidthSync();
         });
 
-        this.scrollSub = viewport
-            .elementScrolled()
-            .pipe(takeUntilDestroyed(this.config.destroyRef))
-            .subscribe(() => {
-                this.syncHorizontalScroll();
-                this.updateScrollingState();
-                this.checkScrolledUp();
-            });
+        this.config.ngZone.runOutsideAngular(() => {
+            this.scrollSub = viewport
+                .elementScrolled()
+                .pipe(takeUntilDestroyed(this.config.destroyRef))
+                .subscribe(() => {
+                    this.syncHorizontalScroll();
+                    this.updateScrollingState();
+                    this.checkScrolledUp();
+                });
+        });
     }
 
     /** Clears timers on destroy. */
@@ -173,18 +175,20 @@ export class VirtualScrollController<T = unknown> {
     }
 
     private updateScrollingState(): void {
-        this.config.ngZone.run(() => {
-            if (!this.config.isScrolling()) {
+        if (!this.config.isScrolling()) {
+            this.config.ngZone.run(() => {
                 this.config.isScrolling.set(true);
-            }
-            if (this.scrollingTimer) {
-                clearTimeout(this.scrollingTimer);
-            }
-            this.scrollingTimer = setTimeout(() => {
+            });
+        }
+        if (this.scrollingTimer) {
+            clearTimeout(this.scrollingTimer);
+        }
+        this.scrollingTimer = setTimeout(() => {
+            this.config.ngZone.run(() => {
                 this.config.isScrolling.set(false);
                 this.config.cdr.markForCheck();
-            }, 150);
-        });
+            });
+        }, 150);
     }
 
     private checkScrolledUp(): void {

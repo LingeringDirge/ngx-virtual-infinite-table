@@ -267,7 +267,7 @@ export class InfiniteScrollTableComponent<T = any>
      */
     /**
      * Rebuilds columnKeys from current templates and flags.
-     * Maintained for 100% backwards compatibility with ESMS Core.
+     * Maintained for 100% backwards compatibility with earlier versions.
      */
     public updateColumnKeys(): void {
         // columnKeys is an auto-reactive computed signal in this package.

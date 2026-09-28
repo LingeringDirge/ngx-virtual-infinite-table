@@ -84,27 +84,36 @@ export class VirtualScrollController<T = unknown> {
         this.lastWordWrapState = wordWrap;
 
         const items = this.config.getItems() ?? [];
+        const activeViewport = viewport ?? this.viewport ?? undefined;
+
         this.config.strategy.updateDataLength(items.length);
-        this.config.strategy.updateItemSize(this.measuredRowHeight ?? this.config.getVirtualRowHeight());
+        this.config.strategy.updateItemSize(this.effectiveItemSize);
         this.config.strategy.updateBufferSize(this.config.getVirtualScrollBuffer());
 
-        const activeViewport = viewport ?? this.viewport ?? undefined;
-        const range = activeViewport?.getRenderedRange();
-        if (range && (range.start !== 0 || range.end !== 0)) {
-            this.config.visibleItems.set(items.slice(range.start, range.end));
-        } else if (items.length > 0) {
-            const vpHeight = activeViewport?.getViewportSize() || 500;
-            const visibleCount = Math.ceil(vpHeight / this.effectiveItemSize);
-            const buffer = this.config.getVirtualScrollBuffer();
-            const fallbackEnd = Math.min(items.length, visibleCount + buffer);
-            this.config.visibleItems.set(items.slice(0, fallbackEnd));
-            if (activeViewport) {
-                activeViewport.setRenderedRange({ start: 0, end: fallbackEnd });
-            }
-        } else {
-            this.config.visibleItems.set([]);
+        if (activeViewport) {
+            activeViewport.checkViewportSize?.();
         }
 
+        if (items.length > 0) {
+            let range = activeViewport?.getRenderedRange();
+            if (!range || (range.start === 0 && range.end === 0)) {
+                const vpHeight = activeViewport?.getViewportSize() || 500;
+                const visibleCount = Math.max(15, Math.ceil(vpHeight / this.effectiveItemSize));
+                const buffer = this.config.getVirtualScrollBuffer();
+                const fallbackEnd = Math.min(items.length, visibleCount + buffer);
+                range = { start: 0, end: fallbackEnd };
+                if (activeViewport) {
+                    activeViewport.setRenderedRange(range);
+                }
+            }
+            this.config.visibleItems.set(items.slice(range.start, range.end));
+            this.config.rangeStart.set(range.start);
+        } else {
+            this.config.visibleItems.set([]);
+            this.config.rangeStart.set(0);
+        }
+
+        this.config.cdr.markForCheck();
         this.scheduleWidthSync();
     }
 
@@ -123,26 +132,11 @@ export class VirtualScrollController<T = unknown> {
         // Immediately synchronize current items and row dimensions
         this.syncData(viewport);
 
-        const allItems = this.config.getItems() ?? [];
-        if (allItems.length > 0) {
-            let range = viewport.getRenderedRange();
-            if (!range || range.end === 0) {
-                const vpHeight = viewport.getViewportSize() || 500;
-                const visibleCount = Math.ceil(vpHeight / this.effectiveItemSize);
-                const buffer = this.config.getVirtualScrollBuffer();
-                range = { start: 0, end: Math.min(allItems.length, visibleCount + buffer) };
-                viewport.setRenderedRange(range);
-            }
-            this.config.visibleItems.set(allItems.slice(range.start, range.end));
-            this.config.rangeStart.set(range.start);
-            this.config.cdr.markForCheck();
-        }
-
         this.rangeSub = viewport.renderedRangeStream.pipe(takeUntilDestroyed(this.config.destroyRef)).subscribe((range) => {
             const allItems = this.config.getItems() ?? [];
             if (allItems.length > 0 && range.end === 0) {
                 const vpHeight = viewport.getViewportSize() || 500;
-                const visibleCount = Math.ceil(vpHeight / this.effectiveItemSize);
+                const visibleCount = Math.max(15, Math.ceil(vpHeight / this.effectiveItemSize));
                 const buffer = this.config.getVirtualScrollBuffer();
                 range = { start: 0, end: Math.min(allItems.length, visibleCount + buffer) };
             }

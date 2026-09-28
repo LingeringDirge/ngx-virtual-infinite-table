@@ -1,9 +1,11 @@
 import {
     ChangeDetectionStrategy,
+    ChangeDetectorRef,
     Component,
+    inject,
+    NgZone,
     OnDestroy,
     OnInit,
-    TemplateRef,
     TrackByFunction,
     signal,
     viewChild
@@ -113,26 +115,6 @@ self.onmessage = function(e) {
  * ═══════════════════════════════════════════════════════════════════════════
  * DEMO APPLICATION COMPONENT
  * ═══════════════════════════════════════════════════════════════════════════
- *
- * This demo demonstrates enterprise best practices for `ngx-virtual-infinite-table`:
- *
- * 1. **Virtualized Infinite Scrolling (Default)**:
- *    - Combines CDK Virtual Scroll with progressive chunk loading (100 rows per page).
- *    - In-memory dataset of 5,000 items, but DOM only ever contains ~25 rows.
- *    - Zero layout thrashing, hardware-accelerated composite scrolling.
- *
- * 2. **Dedicated Web Worker**:
- *    - Offloads CPU-intensive multi-column filtering and multi-type sorting to a background
- *      worker thread (`filter.worker`), keeping the browser UI thread at a silky 60–120 FPS.
- *    - Gracefully falls back to synchronous main-thread filtering if Web Workers are disabled.
- *
- * 3. **TrackBy Optimization**:
- *    - Explicit `trackByProduct` function using scalar `item.id` to prevent DOM element
- *      destruction and re-creation as rows scroll into view.
- *
- * 4. **Modern Material 3 Styling**:
- *    - Uses Material 3 design tokens (`--mat-sys-*`), sticky header containment, dark mode,
- *      and responsive layout toggles.
  */
 @Component({
     selector: 'app-root',
@@ -159,6 +141,9 @@ self.onmessage = function(e) {
 export class AppComponent implements OnInit, OnDestroy {
     /** Reference to the child table component for programmatic controls (seek, export, reset). */
     public table = viewChild(InfiniteScrollTableComponent);
+
+    private readonly ngZone = inject(NgZone);
+    private readonly cdr = inject(ChangeDetectorRef);
 
     // ── Feature Toggles ────────────────────────────────────────────────────
     /** True = Virtualized Infinite Scroll (Default), False = Standard Infinite Scroll. */
@@ -226,7 +211,14 @@ export class AppComponent implements OnInit, OnDestroy {
         this.initWebWorker();
         // Generate mock dataset of 5,000 products
         this.allMockProducts = this.generateMockDataset(5000);
-        this.resetAndLoad();
+        this.filteredDataset = [...this.allMockProducts];
+
+        // Load initial page synchronously to guarantee instantaneous first render
+        const initialChunk = this.filteredDataset.slice(0, this.pageSize);
+        this.currentOffset = initialChunk.length;
+        this.displayedProducts.set(initialChunk);
+        this.hasMoreData.set(this.currentOffset < this.filteredDataset.length);
+        this.isLoading.set(false);
     }
 
     public ngOnDestroy(): void {
@@ -242,11 +234,6 @@ export class AppComponent implements OnInit, OnDestroy {
 
     // ── TrackBy Function ───────────────────────────────────────────────────
 
-    /**
-     * High-performance TrackBy function.
-     * Returning a unique scalar identity (`item.id`) ensures CDK Table reuses existing DOM nodes
-     * when the virtual slice shifts, eliminating GC thrash and flicker.
-     */
     public trackByProduct: TrackByFunction<ProductItem> = (_index: number, item: ProductItem): number => {
         return item.id;
     };
@@ -260,7 +247,10 @@ export class AppComponent implements OnInit, OnDestroy {
                 this.workerBlobUrl = URL.createObjectURL(blob);
                 this.filterWorker = new Worker(this.workerBlobUrl);
                 this.filterWorker.onmessage = ({ data }: { data: ProductItem[] }) => {
-                    this.onFilterWorkerComplete(data);
+                    this.ngZone.run(() => {
+                        this.onFilterWorkerComplete(data);
+                        this.cdr.markForCheck();
+                    });
                 };
             } catch {
                 this.filterWorker = null;
@@ -299,9 +289,6 @@ export class AppComponent implements OnInit, OnDestroy {
 
     // ── Data Operations & Progressive Infinite Scroll ──────────────────────
 
-    /**
-     * Resets pagination and filters/sorts the dataset using the background Web Worker.
-     */
     public resetAndLoad(): void {
         this.isLoading.set(true);
         this.currentOffset = 0;
@@ -316,10 +303,8 @@ export class AppComponent implements OnInit, OnDestroy {
         };
 
         if (this.filterWorker) {
-            // Process on background thread to keep UI thread 100% responsive
             this.filterWorker.postMessage(workerPayload);
         } else {
-            // Fallback to synchronous main thread if workers are unavailable
             const filtered = this.applyClientSideFilters(this.allMockProducts);
             const sorted = this.applyClientSideSort(filtered);
             this.onFilterWorkerComplete(sorted);
@@ -330,7 +315,6 @@ export class AppComponent implements OnInit, OnDestroy {
         this.filteredDataset = results;
         this.currentOffset = 0;
 
-        // Load initial page (100 rows) with virtualized infinite scrolling
         const initialChunk = this.filteredDataset.slice(0, this.pageSize);
         this.currentOffset = initialChunk.length;
         this.displayedProducts.set(initialChunk);
@@ -338,24 +322,21 @@ export class AppComponent implements OnInit, OnDestroy {
         this.isLoading.set(false);
 
         this.table()?.resetScrollState();
+        this.cdr.markForCheck();
     }
 
-    /**
-     * Infinite scroll pagination callback invoked by `ngx-virtual-infinite-table`
-     * when the user scrolls near the end of currently loaded rows.
-     */
     public loadMoreRows = (): void => {
         if (this.isLoading() || !this.hasMoreData()) return;
         this.isLoading.set(true);
 
-        // Small timeout simulates asynchronous network/API latency
         setTimeout(() => {
             const nextChunk = this.filteredDataset.slice(this.currentOffset, this.currentOffset + this.pageSize);
             this.currentOffset += nextChunk.length;
             this.displayedProducts.update((prev: ProductItem[]) => [...prev, ...nextChunk]);
             this.hasMoreData.set(this.currentOffset < this.filteredDataset.length);
             this.isLoading.set(false);
-        }, 30);
+            this.cdr.markForCheck();
+        }, 20);
     };
 
     // ── Sort / Filter Handlers ─────────────────────────────────────────────

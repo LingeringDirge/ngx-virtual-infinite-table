@@ -23,12 +23,13 @@
       "dom"
     ],
     "paths": {
-      "ngx-infinite-scroll-table": [
+      "ngx-virtual-infinite-table": [
         "../src/public-api.ts"
       ],
       "*": [
         "*",
-        "node_modules/*"
+        "node_modules/*",
+        "../node_modules/*"
       ]
     }
   },

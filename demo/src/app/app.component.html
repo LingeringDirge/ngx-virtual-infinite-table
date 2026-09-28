@@ -5,7 +5,7 @@
         <div class="header-left">
             <mat-icon class="logo-icon">grid_on</mat-icon>
             <div>
-                <h1>ngx-infinite-scroll-table</h1>
+                <h1>ngx-virtual-infinite-table</h1>
                 <p class="subtitle">High-performance Angular grid — virtual scroll, infinite pagination, resize, filtering & more</p>
             </div>
         </div>
@@ -13,7 +13,7 @@
             <button mat-icon-button (click)="toggleDarkMode()" [matTooltip]="isDarkMode() ? 'Light mode' : 'Dark mode'">
                 <mat-icon>{{ isDarkMode() ? 'light_mode' : 'dark_mode' }}</mat-icon>
             </button>
-            <a mat-stroked-button href="https://github.com/LingeringDirge/Custom-Material-Infinite-Scroll-Table" target="_blank">
+            <a mat-stroked-button href="https://github.com/LingeringDirge/ngx-virtual-infinite-table" target="_blank">
                 <mat-icon>code</mat-icon>
                 GitHub
             </a>
@@ -131,7 +131,7 @@
 
     <!-- ── Table ───────────────────────────────────────────────────────────── -->
     <main class="table-card">
-        <ngx-infinite-scroll-table
+        <ngx-virtual-infinite-table
             #table
             [items]="displayedProducts()"
             [loadMoreRows]="loadMoreRows"
@@ -252,7 +252,7 @@
                 let-row>
                 <span class="rating-badge">&#9733; {{ row.rating }}</span>
             </ng-template>
-        </ngx-infinite-scroll-table>
+        </ngx-virtual-infinite-table>
     </main>
 
     <!-- ── Feature Callouts ────────────────────────────────────────────────── -->
@@ -321,7 +321,7 @@
 
     <!-- ── Filter Templates ────────────────────────────────────────────────── -->
     <ng-template #titleFilterTpl>
-        <ngx-infinite-scroll-table-filter
+        <ngx-virtual-infinite-table-filter
             dataKey="title"
             columnName="Product Name"
             type="text"
@@ -331,7 +331,7 @@
     </ng-template>
 
     <ng-template #categoryFilterTpl>
-        <ngx-infinite-scroll-table-filter
+        <ngx-virtual-infinite-table-filter
             dataKey="category"
             columnName="Category"
             type="singleselect"
@@ -344,7 +344,7 @@
     </ng-template>
 
     <ng-template #priceFilterTpl>
-        <ngx-infinite-scroll-table-filter
+        <ngx-virtual-infinite-table-filter
             dataKey="price"
             columnName="Price"
             type="currency"
@@ -354,7 +354,7 @@
     </ng-template>
 
     <ng-template #stockFilterTpl>
-        <ngx-infinite-scroll-table-filter
+        <ngx-virtual-infinite-table-filter
             dataKey="stock"
             columnName="Stock"
             type="numeric"
@@ -364,7 +364,7 @@
     </ng-template>
 
     <ng-template #inStockFilterTpl>
-        <ngx-infinite-scroll-table-filter
+        <ngx-virtual-infinite-table-filter
             dataKey="inStock"
             columnName="Availability"
             type="boolean"

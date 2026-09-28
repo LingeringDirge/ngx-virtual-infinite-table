@@ -1,5 +1,5 @@
 {
-  "name": "custom-material-infinite-scroll-table",
+  "name": "ngx-virtual-infinite-table",
   "version": "1.0.0",
   "description": "High-performance Angular data table featuring virtual scrolling, infinite scroll pagination, column sorting, filtering overlays, drag-and-drop row reordering, and expandable details.",
   "keywords": [
@@ -20,12 +20,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/LingeringDirge/Custom-Material-Infinite-Scroll-Table.git"
+    "url": "https://github.com/LingeringDirge/ngx-virtual-infinite-table.git"
   },
   "bugs": {
-    "url": "https://github.com/LingeringDirge/Custom-Material-Infinite-Scroll-Table/issues"
+    "url": "https://github.com/LingeringDirge/ngx-virtual-infinite-table/issues"
   },
-  "homepage": "https://github.com/LingeringDirge/Custom-Material-Infinite-Scroll-Table#readme",
+  "homepage": "https://github.com/LingeringDirge/ngx-virtual-infinite-table#readme",
   "scripts": {
     "build": "ng-packagr -p ng-package.json",
     "test": "jest",

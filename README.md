@@ -1,7 +1,7 @@
-# ngx-infinite-scroll-table
+# ngx-virtual-infinite-table
 
-[![npm version](https://img.shields.io/npm/v/ngx-infinite-scroll-table?style=flat-square)](https://www.npmjs.com/package/ngx-infinite-scroll-table)
-[![license](https://img.shields.io/github/license/LingeringDirge/Custom-Material-Infinite-Scroll-Table?style=flat-square)](LICENSE)
+[![npm version](https://img.shields.io/npm/v/ngx-virtual-infinite-table?style=flat-square)](https://www.npmjs.com/package/ngx-virtual-infinite-table)
+[![license](https://img.shields.io/github/license/LingeringDirge/ngx-virtual-infinite-table?style=flat-square)](LICENSE)
 [![angular](https://img.shields.io/badge/angular-19+-red?style=flat-square)](https://angular.io)
 [![material](https://img.shields.io/badge/material-19+-blue?style=flat-square)](https://material.angular.io)
 
@@ -24,14 +24,14 @@ A high-performance Angular data table component built on **Angular Material CDK*
 
 ## Live Demo
 
-[View the showcase demo →](https://lingeringdirge.github.io/Custom-Material-Infinite-Scroll-Table)
+[View the showcase demo →](https://lingeringdirge.github.io/ngx-virtual-infinite-table)
 
 ---
 
 ## Installation
 
 ```bash
-npm install ngx-infinite-scroll-table ngx-infinite-scroll
+npm install ngx-virtual-infinite-table ngx-infinite-scroll
 ```
 
 The package has peer dependencies on `@angular/material`, `@angular/cdk`, and `ngx-infinite-scroll`.
@@ -43,7 +43,7 @@ The package has peer dependencies on `@angular/material`, `@angular/cdk`, and `n
 ### 1. Import the component
 
 ```typescript
-import { InfiniteScrollTableComponent, InfiniteScrollTableTemplateColumnDirective } from 'ngx-infinite-scroll-table';
+import { InfiniteScrollTableComponent, InfiniteScrollTableTemplateColumnDirective } from 'ngx-virtual-infinite-table';
 
 @Component({
   standalone: true,
@@ -56,7 +56,7 @@ export class MyComponent {}
 ### 2. Add to your template
 
 ```html
-<ngx-infinite-scroll-table
+<ngx-virtual-infinite-table
   [items]="products()"
   [loadMoreRows]="loadNextPage"
   [hasMoreData]="hasMore()"
@@ -72,7 +72,7 @@ export class MyComponent {}
     ${{ row.price.toFixed(2) }}
   </ng-template>
 
-</ngx-infinite-scroll-table>
+</ngx-virtual-infinite-table>
 ```
 
 > **Important**: The table container must have a defined height (e.g., `height: 480px` or a flex parent).
@@ -169,14 +169,14 @@ public loadNextPage = (): void => {
 ### Virtual Scroll (Large Datasets)
 
 ```html
-<ngx-infinite-scroll-table
+<ngx-virtual-infinite-table
   [items]="allRows()"
   [enableVirtualScroll]="true"
   [virtualRowHeight]="48"
   [virtualScrollBuffer]="20"
   [hasMoreData]="false">
   ...
-</ngx-infinite-scroll-table>
+</ngx-virtual-infinite-table>
 ```
 
 > Note: virtual scroll is automatically disabled when `expandedRowTemplate` or `enableDrag` is active (incompatible features).
@@ -198,13 +198,13 @@ this.table.scrollToRow(2000, 'smooth');
 ### Column Sorting
 
 ```html
-<ngx-infinite-scroll-table (sortChanged)="onSort($event)">
+<ngx-virtual-infinite-table (sortChanged)="onSort($event)">
   <!-- Pre-sort this column Descending on initial load -->
   <ng-template ngxInfiniteScrollColumn title="Date" dataKey="createdAt"
                [preSortDirection]="SortType.Descending" let-row>
     {{ row.createdAt | date }}
   </ng-template>
-</ngx-infinite-scroll-table>
+</ngx-virtual-infinite-table>
 ```
 
 ```typescript
@@ -220,15 +220,15 @@ public onSort(event: IInfiniteScrollSortEvent): void {
 ### Column Filters
 
 ```html
-<ngx-infinite-scroll-table [enableFilters]="true">
+<ngx-virtual-infinite-table [enableFilters]="true">
   <ng-template ngxInfiniteScrollColumn title="Name" dataKey="name"
                [filterTemplate]="nameTpl" let-row>
     {{ row.name }}
   </ng-template>
-</ngx-infinite-scroll-table>
+</ngx-virtual-infinite-table>
 
 <ng-template #nameTpl>
-  <ngx-infinite-scroll-table-filter
+  <ngx-virtual-infinite-table-filter
     dataKey="name"
     columnName="Name"
     type="text"
@@ -245,7 +245,7 @@ Filter types: `"text"` | `"numeric"` | `"currency"` | `"date"` | `"boolean"` | `
 ### Row Selection
 
 ```html
-<ngx-infinite-scroll-table
+<ngx-virtual-infinite-table
   [isRowSelected]="isSelected"
   [isRowSelectable]="canSelect"
   [rowSelectableTooltip]="disabledTooltip"
@@ -270,9 +270,9 @@ this.table.clearSelection();  // deselect all
 ### Expandable Master-Detail Rows
 
 ```html
-<ngx-infinite-scroll-table [expandedRowTemplate]="detailTpl">
+<ngx-virtual-infinite-table [expandedRowTemplate]="detailTpl">
   ...
-</ngx-infinite-scroll-table>
+</ngx-virtual-infinite-table>
 
 <ng-template #detailTpl let-item>
   <div class="detail">{{ item.description }}</div>
@@ -293,7 +293,7 @@ this.table.getExpandedRows();                // → T[]
 ### Drag & Drop Row Reordering
 
 ```html
-<ngx-infinite-scroll-table [enableDrag]="true" (rowDropped)="onDrop($event)">
+<ngx-virtual-infinite-table [enableDrag]="true" (rowDropped)="onDrop($event)">
 ```
 
 ```typescript
@@ -307,7 +307,7 @@ public onDrop(event: CdkDragDrop<MyRow[], MyRow[]>): void {
 ### CSV Export
 
 ```typescript
-import { exportToCsv } from 'ngx-infinite-scroll-table';
+import { exportToCsv } from 'ngx-virtual-infinite-table';
 
 exportToCsv(
   this.products(),
@@ -326,11 +326,11 @@ exportToCsv(
 ### Custom Empty State
 
 ```html
-<ngx-infinite-scroll-table
+<ngx-virtual-infinite-table
   [emptyText]="'No matching records'"
   [emptyTemplate]="emptyTpl">
   ...
-</ngx-infinite-scroll-table>
+</ngx-virtual-infinite-table>
 
 <!-- Or provide a fully custom empty state template -->
 <ng-template #emptyTpl>
@@ -346,9 +346,9 @@ exportToCsv(
 ### Custom Loading Overlay
 
 ```html
-<ngx-infinite-scroll-table [loadingTemplate]="loadingTpl">
+<ngx-virtual-infinite-table [loadingTemplate]="loadingTpl">
   ...
-</ngx-infinite-scroll-table>
+</ngx-virtual-infinite-table>
 
 <ng-template #loadingTpl let-mode="mode">
   @if (mode === 'initial') {
@@ -366,7 +366,7 @@ exportToCsv(
 The table inherits colors from your Angular Material 3 theme automatically via `--mat-sys-*` CSS variables. To override:
 
 ```scss
-ngx-infinite-scroll-table {
+ngx-virtual-infinite-table {
   --mat-sys-surface:                  #ffffff;
   --mat-sys-surface-container-high:   #f8fafc;
   --mat-sys-surface-container-highest:#e2e8f0;
@@ -384,7 +384,7 @@ Dark mode is enabled automatically when a parent element has the class `.dark` o
 
 ## 📖 API Reference
 
-### `<ngx-infinite-scroll-table>` Inputs
+### `<ngx-virtual-infinite-table>` Inputs
 
 | Input | Type | Default | Description |
 |---|---|---|---|
@@ -509,7 +509,7 @@ Applied to `<ng-template>` inside the table:
 
 ---
 
-### `<ngx-infinite-scroll-table-filter>` Inputs
+### `<ngx-virtual-infinite-table-filter>` Inputs
 
 | Input | Type | Description |
 |---|---|---|
@@ -524,7 +524,7 @@ Applied to `<ng-template>` inside the table:
 ### `exportToCsv` Utility
 
 ```typescript
-import { exportToCsv, ICsvExportColumn } from 'ngx-infinite-scroll-table';
+import { exportToCsv, ICsvExportColumn } from 'ngx-virtual-infinite-table';
 
 exportToCsv<MyRow>(
   rows,

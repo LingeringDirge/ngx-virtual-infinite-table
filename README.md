@@ -267,6 +267,66 @@ this.table.clearSelection();  // deselect all
 
 ---
 
+### Custom Filter Template (Custom UI / Date Pickers / Sliders)
+
+You can project any custom template into the column filter overlay instead of the built-in filter menu:
+
+```html
+<ngx-virtual-infinite-table [enableFilters]="true">
+  <ng-template
+    ngxInfiniteScrollColumn
+    title="Price Range"
+    dataKey="price"
+    [filterTemplate]="customPriceFilter"
+    [filterEnabled]="isPriceFilterActive"
+    let-row>
+    {{ row.price | currency }}
+  </ng-template>
+</ngx-virtual-infinite-table>
+
+<!-- Custom Filter Overlay Template -->
+<ng-template #customPriceFilter>
+  <div class="custom-slider-filter" style="padding: 16px; width: 240px;">
+    <h4>Filter by Maximum Price: ${{ maxPrice() }}</h4>
+    <input type="range" min="0" max="1000" [value]="maxPrice()" (input)="onPriceSliderChange($event)" />
+    <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 12px;">
+      <button mat-button (click)="resetPriceFilter()">Reset</button>
+      <button mat-flat-button color="primary" (click)="applyPriceFilter()">Apply</button>
+    </div>
+  </div>
+</ng-template>
+```
+
+---
+
+### Custom Header Template (Custom Header Cell / Select-All Master Checkbox)
+
+Override the default header title and sort button with your own custom header template:
+
+```html
+<ngx-virtual-infinite-table>
+  <ng-template
+    ngxInfiniteScrollColumn
+    title="Select"
+    width="50px"
+    [sticky]="true"
+    [headerTemplate]="selectAllHeaderTpl"
+    let-row>
+    <mat-checkbox [checked]="isSelected(row)" (change)="toggleRow(row)" />
+  </ng-template>
+</ngx-virtual-infinite-table>
+
+<ng-template #selectAllHeaderTpl>
+  <mat-checkbox
+    [checked]="isAllSelected()"
+    [indeterminate]="isPartiallySelected()"
+    (change)="toggleAll($event.checked)"
+    matTooltip="Select / Deselect all visible rows" />
+</ng-template>
+```
+
+---
+
 ### Expandable Master-Detail Rows
 
 ```html

@@ -1,0 +1,48 @@
+@use '@angular/material' as mat;
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  background-color: var(--mat-sys-surface, #f8f9fa);
+  color: var(--mat-sys-on-surface, #212529);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+// Global tokens for modern Material 3 feel
+:root {
+  --mat-sys-primary: #3b82f6;
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-surface: #ffffff;
+  --mat-sys-on-surface: #1e293b;
+  --mat-sys-surface-variant: #f1f5f9;
+  --mat-sys-on-surface-variant: #64748b;
+  --mat-sys-surface-container-high: #f8fafc;
+  --mat-sys-surface-container-highest: #e2e8f0;
+  --mat-sys-tertiary: #6366f1;
+  --mat-sys-on-tertiary: #ffffff;
+  --mat-sys-tertiary-container: #e0e7ff;
+  --mat-sys-outline: #cbd5e1;
+  --mat-sys-outline-variant: #e2e8f0;
+}
+
+body.dark-theme {
+  --mat-sys-primary: #60a5fa;
+  --mat-sys-on-primary: #0f172a;
+  --mat-sys-surface: #0f172a;
+  --mat-sys-on-surface: #f8fafc;
+  --mat-sys-surface-variant: #1e293b;
+  --mat-sys-on-surface-variant: #94a3b8;
+  --mat-sys-surface-container-high: #1e293b;
+  --mat-sys-surface-container-highest: #334155;
+  --mat-sys-tertiary: #818cf8;
+  --mat-sys-on-tertiary: #0f172a;
+  --mat-sys-tertiary-container: #312e81;
+  --mat-sys-outline: #475569;
+  --mat-sys-outline-variant: #334155;
+  background-color: #0b0f19;
+  color: #f8fafc;
+}

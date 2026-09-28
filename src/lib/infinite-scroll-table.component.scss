@@ -1,0 +1,447 @@
+:host {
+    display: block;
+    height: 100%;
+    width: 100%;
+    position: relative;
+    box-sizing: border-box;
+
+    .cdk-drag-placeholder {
+        background: var(--mat-sys-surface, #ffffff);
+        border: dotted 3px var(--mat-sys-surface-container-highest, #e6e0e9);
+        min-height: 48px;
+        transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+    }
+
+    .mat-table-wrapper {
+        position: relative;
+        display: grid;
+        grid-template-rows: 1fr auto;
+        height: 100%;
+        scrollbar-gutter: stable;
+
+        // ── Virtual Scroll Viewport ──────────────────────────────────────────
+        &.virtual-scroll-wrapper {
+            grid-template-rows: auto 1fr auto;
+            grid-template-columns: minmax(0, 1fr);
+
+            .virtual-header-wrapper {
+                overflow-x: clip;
+                overflow-y: visible;
+                flex-shrink: 0;
+                position: relative;
+                z-index: 2;
+            }
+
+            .virtual-header-table {
+                min-height: auto;
+                overflow: visible;
+                background: transparent !important;
+                flex-shrink: 0;
+                will-change: transform;
+
+                mat-header-row {
+                    background-color: var(--mat-sys-surface-container-high, #ece6f0);
+
+                    .header-button {
+                        cursor: pointer;
+                        display: inline-flex;
+                        align-items: center;
+                        justify-content: center;
+                        border-radius: 4px;
+                        padding: 2px;
+                        transition: background-color 0.2s ease;
+
+                        &:hover {
+                            background-color: var(--mat-sys-surface-container-highest, #e6e0e9);
+                        }
+                    }
+                }
+            }
+
+            .virtual-body-table {
+                min-height: auto;
+                overflow: visible;
+                background: transparent !important;
+
+                mat-row {
+                    will-change: transform;
+                    box-sizing: border-box;
+                    min-height: var(--ist-virtual-row-height, 48px);
+                }
+            }
+
+            .virtual-viewport {
+                height: 100%;
+                outline: none;
+                overflow-y: scroll;
+                overflow-x: auto;
+                position: relative;
+                z-index: 1;
+                background-color: var(--mat-sys-surface, #ffffff);
+                contain: strict;
+
+                ::ng-deep .cdk-virtual-scroll-content-wrapper {
+                    min-width: 100%;
+                }
+            }
+        }
+
+        mat-table {
+            min-height: 120px;
+            overflow: auto;
+            background: transparent !important;
+
+            &:focus-visible {
+                outline: 2px solid var(--mat-sys-primary, #6750a4);
+                outline-offset: -2px;
+            }
+            &:focus:not(:focus-visible) {
+                outline: none;
+            }
+
+            mat-header-row {
+                background-color: var(--mat-sys-surface-container-high, #ece6f0);
+
+                .header-button {
+                    cursor: pointer;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    border-radius: 4px;
+                    padding: 2px;
+                    transition: background-color 0.2s ease;
+
+                    &:hover {
+                        background-color: var(--mat-sys-surface-container-highest, #e6e0e9);
+                    }
+                }
+            }
+
+            mat-header-cell {
+                background-color: var(--mat-sys-surface-container-high, #ece6f0);
+                color: var(--mat-sys-on-surface, #1d1b20);
+                font-weight: 600;
+            }
+
+            mat-row,
+            mat-header-row {
+                &.interactive {
+                    transition: background-color 0.2s ease;
+
+                    &:hover {
+                        cursor: pointer;
+                        background-color: var(--mat-sys-tertiary-container, #ffd8e4);
+                    }
+                }
+            }
+
+            .drag-column,
+            .checkbox-column {
+                flex: 0 0 auto;
+
+                .checkbox-tooltip-wrapper {
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+            }
+
+            .drag-icon {
+                cursor: grab;
+                color: var(--mat-sys-on-surface, #1d1b20);
+                &:active {
+                    cursor: grabbing;
+                }
+            }
+
+            .filter-set-highlight {
+                background-color: var(--mat-sys-tertiary-container, #ffd8e4);
+            }
+
+            .edit-filter-highlight {
+                background-color: var(--mat-sys-tertiary, #7d5260);
+                color: var(--mat-sys-on-tertiary, #ffffff);
+                overflow: visible;
+                position: relative;
+            }
+
+            .sort-header {
+                display: flex;
+                align-items: center;
+                gap: 4px;
+                mat-icon {
+                    line-height: initial;
+                }
+            }
+
+            .expand-icon {
+                cursor: pointer;
+            }
+
+            ::ng-deep .mat-mdc-form-field-subscript-wrapper {
+                display: none;
+            }
+        }
+
+        // Expansion Row Detail
+        .mat-expansion-row {
+            height: 0;
+
+            td {
+                border-bottom-width: 0;
+                padding: 0;
+            }
+
+            .expansion-content {
+                display: flex;
+                flex-direction: column;
+                padding: 0;
+                overflow: hidden;
+                height: 0;
+                min-height: 0;
+                background-color: var(--mat-sys-surface-container, #f3edf7);
+                transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), padding 0.3s ease;
+
+                &.expansion-show {
+                    height: initial;
+                    max-height: 9999px;
+                    padding: 16px;
+                }
+            }
+        }
+    }
+
+    // Fit Content Mode (renders standard table layout)
+    .fit-content {
+        mat-table {
+            overflow-x: auto;
+        }
+
+        mat-header-row,
+        mat-row {
+            display: table-row;
+        }
+
+        mat-header-cell {
+            padding: 8px 12px;
+        }
+
+        mat-cell {
+            padding: 6px 12px;
+        }
+
+        mat-cell,
+        mat-header-cell {
+            word-wrap: initial;
+            display: table-cell;
+            line-break: unset;
+            width: 1%;
+            white-space: nowrap;
+            overflow: hidden;
+            vertical-align: middle;
+            border-bottom: 1px solid var(--mat-sys-outline-variant, #cac4d0);
+            border-collapse: collapse;
+
+            &.button-column,
+            &.drag-column,
+            &.checkbox-column {
+                width: 0%;
+            }
+        }
+    }
+
+    // Row Striping
+    ::ng-deep .enable-row-stripes {
+        mat-table {
+            mat-row:nth-child(odd of :not(.mat-expansion-row)) {
+                background-color: var(--mat-sys-surface, #ffffff);
+            }
+
+            mat-row:nth-child(even of :not(.mat-expansion-row)) {
+                background-color: var(--mat-sys-surface-variant, #f5f5f7);
+            }
+        }
+
+        .virtual-body-table mat-row[data-row-index] {
+            background-color: unset;
+
+            &.virtual-row-even {
+                background-color: var(--mat-sys-surface-variant, #f5f5f7);
+            }
+
+            &.virtual-row-odd {
+                background-color: var(--mat-sys-surface, #ffffff);
+            }
+        }
+    }
+
+
+    // Empty State
+    .empty-table-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 48px 16px;
+        color: var(--mat-sys-on-surface-variant, #49454f);
+        text-align: center;
+
+        .empty-table-icon {
+            font-size: 40px;
+            width: 40px;
+            height: 40px;
+            color: var(--mat-sys-outline, #79747e);
+        }
+
+        .empty-table-text {
+            font-size: 14px;
+            font-weight: 500;
+        }
+    }
+
+    // Word Wrap
+    .enable-word-wrap {
+        mat-table {
+            mat-row {
+                mat-cell,
+                mat-header-cell {
+                    white-space: initial;
+                    word-break: break-word;
+                }
+            }
+        }
+    }
+
+    // Pagination Spinner Row
+    .loading-more-row {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 8px 0;
+        color: var(--mat-sys-on-surface-variant, #49454f);
+        font-size: 13px;
+        background: linear-gradient(to bottom, rgba(255, 255, 255, 0.4), var(--mat-sys-surface, #ffffff));
+        pointer-events: none;
+        z-index: 2;
+    }
+
+    // Centered Initial Loading Overlay
+    .loading-overlay {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        color: var(--mat-sys-on-surface-variant, #49454f);
+        font-size: 14px;
+        background: var(--mat-sys-surface, #ffffff);
+        z-index: 3;
+    }
+
+    // Seeking Overlay (for scrollToRow on unrendered data)
+    .seeking-overlay {
+        position: absolute;
+        inset: 0;
+        z-index: 10;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        background: var(--mat-sys-scrim, rgba(0, 0, 0, 0.4));
+        pointer-events: all;
+        color: var(--mat-sys-inverse-on-surface, #f5eff7);
+        font-size: 14px;
+    }
+}
+
+// CDK Connected Overlay Panel for Column Filters
+.filter-overlay-panel {
+    background-color: var(--mat-sys-surface, #ffffff);
+    border: 1px solid var(--mat-sys-outline, #79747e);
+    border-radius: 8px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    padding: 12px;
+    min-width: 280px;
+    max-width: 420px;
+    z-index: 1000;
+}
+
+// CDK Drag & Drop Preview
+::ng-deep .cdk-drag-preview {
+    z-index: 2000 !important;
+}
+
+::ng-deep .cdk-drop-list-dragging .cdk-drag {
+    transition: transform 250ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+::ng-deep .mat-row.cdk-drag-preview {
+    display: table-row;
+    background: var(--mat-sys-surface, #ffffff);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+
+    mat-cell,
+    mat-header-cell {
+        padding: 6px 12px;
+        vertical-align: middle;
+    }
+}
+
+// Dark Mode Support
+:host-context(.dark),
+.dark & {
+    .filter-overlay-panel {
+        background-color: var(--mat-sys-surface-container-highest, #36343b);
+        color: var(--mat-sys-on-surface, #e6e1e5);
+    }
+
+    .enable-row-stripes {
+        mat-table mat-row:nth-child(even of :not(.mat-expansion-row)) {
+            background-color: var(--mat-sys-surface-container-highest, #2b2930);
+        }
+
+        .virtual-body-table mat-row[data-row-index].virtual-row-even {
+            background-color: var(--mat-sys-surface-container-highest, #2b2930);
+        }
+    }
+}
+
+// ── Column Resize Handle ───────────────────────────────────────────────────
+.mat-table-wrapper mat-header-cell {
+    position: relative;
+    overflow: visible;
+}
+
+.col-resize-handle {
+    position: absolute;
+    right: -2px;
+    top: 0;
+    bottom: 0;
+    width: 5px;
+    cursor: col-resize;
+    z-index: 2;
+    background: transparent;
+    border-right: 2px solid transparent;
+    transition: border-color 0.15s ease;
+
+    &:hover {
+        border-right-color: var(--mat-sys-primary, #6750a4);
+    }
+}
+
+// Disable text selection and set global resize cursor while dragging
+.mat-table-wrapper.is-resizing,
+.mat-table-wrapper.is-resizing * {
+    cursor: col-resize !important;
+    user-select: none !important;
+}

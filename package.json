@@ -1,0 +1,48 @@
+{
+  "name": "custom-material-infinite-scroll-table",
+  "version": "1.0.0",
+  "description": "High-performance Angular data table featuring virtual scrolling, infinite scroll pagination, column sorting, filtering overlays, drag-and-drop row reordering, and expandable details.",
+  "keywords": [
+    "angular",
+    "table",
+    "datatable",
+    "grid",
+    "infinite-scroll",
+    "virtual-scroll",
+    "cdk-virtual-scroll",
+    "mat-table",
+    "material",
+    "pagination",
+    "drag-and-drop",
+    "expandable-rows"
+  ],
+  "author": "Vincent Fermo",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LingeringDirge/Custom-Material-Infinite-Scroll-Table.git"
+  },
+  "bugs": {
+    "url": "https://github.com/LingeringDirge/Custom-Material-Infinite-Scroll-Table/issues"
+  },
+  "homepage": "https://github.com/LingeringDirge/Custom-Material-Infinite-Scroll-Table#readme",
+  "scripts": {
+    "build": "ng-packagr -p ng-package.json",
+    "test": "jest",
+    "build:demo": "cd demo && npm run build",
+    "deploy:pages": "cd demo && npm run deploy"
+  },
+  "peerDependencies": {
+    "@angular/cdk": ">=17.2.0",
+    "@angular/common": ">=17.2.0",
+    "@angular/core": ">=17.2.0",
+    "@angular/forms": ">=17.2.0",
+    "@angular/material": ">=17.2.0",
+    "ngx-infinite-scroll": ">=17.0.0",
+    "rxjs": ">=7.4.0"
+  },
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

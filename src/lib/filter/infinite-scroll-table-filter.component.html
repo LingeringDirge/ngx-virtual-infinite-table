@@ -1,0 +1,228 @@
+<div class="filter-options">
+    @switch (type) {
+        @case ('text') {
+            <div class="filter-row text-filter">
+                <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                    <input
+                        matInput
+                        [placeholder]="'Search ' + (columnName || '') + '...'"
+                        type="text"
+                        [(ngModel)]="filterValue.text"
+                        (keyup)="keyPress($event)" />
+                </mat-form-field>
+                <button
+                    mat-icon-button
+                    type="button"
+                    class="filter-action-btn"
+                    (click)="applyFilters()"
+                    matTooltip="Apply filter"
+                    aria-label="Apply filter">
+                    <mat-icon>check</mat-icon>
+                </button>
+                @if (filterValue.text) {
+                    <button
+                        mat-icon-button
+                        type="button"
+                        class="filter-action-btn"
+                        (click)="clearFilter()"
+                        matTooltip="Clear filter"
+                        aria-label="Clear filter">
+                        <mat-icon>close</mat-icon>
+                    </button>
+                }
+            </div>
+        }
+        @case ('numeric') {
+            <div class="filter-row numeric-filter">
+                <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                    <input
+                        matInput
+                        placeholder="Min"
+                        type="number"
+                        [(ngModel)]="filterValue.minValue"
+                        (keyup)="keyPress($event)" />
+                </mat-form-field>
+                <span class="to-text">to</span>
+                <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                    <input
+                        matInput
+                        placeholder="Max"
+                        type="number"
+                        [(ngModel)]="filterValue.maxValue"
+                        (keyup)="keyPress($event)" />
+                </mat-form-field>
+                <button
+                    mat-icon-button
+                    type="button"
+                    class="filter-action-btn"
+                    (click)="applyFilters()"
+                    matTooltip="Apply filter"
+                    aria-label="Apply filter">
+                    <mat-icon>check</mat-icon>
+                </button>
+                @if (filterValue.minValue != null || filterValue.maxValue != null) {
+                    <button
+                        mat-icon-button
+                        type="button"
+                        class="filter-action-btn"
+                        (click)="clearFilter()"
+                        matTooltip="Clear filter"
+                        aria-label="Clear filter">
+                        <mat-icon>close</mat-icon>
+                    </button>
+                }
+            </div>
+        }
+        @case ('currency') {
+            <div class="filter-row numeric-filter">
+                <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                    <span matTextPrefix>$</span>
+                    <input
+                        matInput
+                        placeholder="Min"
+                        type="number"
+                        [(ngModel)]="filterValue.minValue"
+                        (keyup)="keyPress($event)" />
+                </mat-form-field>
+                <span class="to-text">to</span>
+                <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                    <span matTextPrefix>$</span>
+                    <input
+                        matInput
+                        placeholder="Max"
+                        type="number"
+                        [(ngModel)]="filterValue.maxValue"
+                        (keyup)="keyPress($event)" />
+                </mat-form-field>
+                <button
+                    mat-icon-button
+                    type="button"
+                    class="filter-action-btn"
+                    (click)="applyFilters()"
+                    matTooltip="Apply filter"
+                    aria-label="Apply filter">
+                    <mat-icon>check</mat-icon>
+                </button>
+                @if (filterValue.minValue != null || filterValue.maxValue != null) {
+                    <button
+                        mat-icon-button
+                        type="button"
+                        class="filter-action-btn"
+                        (click)="clearFilter()"
+                        matTooltip="Clear filter"
+                        aria-label="Clear filter">
+                        <mat-icon>close</mat-icon>
+                    </button>
+                }
+            </div>
+        }
+        @case ('date') {
+            <div class="filter-row date-filter">
+                <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                    <mat-date-range-input [rangePicker]="picker">
+                        <input
+                            matStartDate
+                            placeholder="Start Date"
+                            [(ngModel)]="filterValue.minDate"
+                            (keyup)="keyPress($event)" />
+                        <input
+                            matEndDate
+                            placeholder="End Date"
+                            [(ngModel)]="filterValue.maxDate"
+                            (keyup)="keyPress($event)" />
+                    </mat-date-range-input>
+                    <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+                    <mat-date-range-picker
+                        #picker
+                        (opened)="datePickerOpened()"
+                        (closed)="datePickerClosed()">
+                    </mat-date-range-picker>
+                </mat-form-field>
+                <button
+                    mat-icon-button
+                    type="button"
+                    class="filter-action-btn"
+                    (click)="applyFilters()"
+                    matTooltip="Apply filter"
+                    aria-label="Apply filter">
+                    <mat-icon>check</mat-icon>
+                </button>
+                @if (filterValue.minDate || filterValue.maxDate) {
+                    <button
+                        mat-icon-button
+                        type="button"
+                        class="filter-action-btn"
+                        (click)="clearFilter()"
+                        matTooltip="Clear filter"
+                        aria-label="Clear filter">
+                        <mat-icon>close</mat-icon>
+                    </button>
+                }
+            </div>
+        }
+        @case ('boolean') {
+            <div class="filter-row boolean-filter">
+                <mat-radio-group [(ngModel)]="filterValue.text" (change)="applyFilters()">
+                    <mat-radio-button value="true">True</mat-radio-button>
+                    <mat-radio-button value="false">False</mat-radio-button>
+                    <mat-radio-button [value]="null">Clear</mat-radio-button>
+                </mat-radio-group>
+            </div>
+        }
+        @case ('multiselect') {
+            <div class="filter-row multiselect-filter">
+                <button
+                    mat-stroked-button
+                    type="button"
+                    class="lookup-trigger-btn"
+                    (click)="triggerLookup($event)"
+                    [matTooltip]="lookupValueNames"
+                    [matTooltipDisabled]="displayText === lookupValueNames">
+                    {{ displayText }}
+                </button>
+                @if (filterValue.enabled) {
+                    <button
+                        mat-icon-button
+                        type="button"
+                        class="filter-action-btn"
+                        (click)="clearFilter()"
+                        matTooltip="Clear filter"
+                        aria-label="Clear filter">
+                        <mat-icon>close</mat-icon>
+                    </button>
+                }
+            </div>
+        }
+        @case ('singleselect') {
+            <div class="filter-row singleselect-filter">
+                <mat-form-field appearance="outline" subscriptSizing="dynamic">
+                    <mat-select
+                        [(ngModel)]="filterValue.singleselect"
+                        (selectionChange)="applyFilters()"
+                        placeholder="Select an option">
+                        <mat-option [value]="null">-- None --</mat-option>
+                        @for (option of filterValue.options; track option) {
+                            <mat-option [value]="option">{{ option }}</mat-option>
+                        }
+                    </mat-select>
+                </mat-form-field>
+                @if (filterValue.enabled) {
+                    <button
+                        mat-icon-button
+                        type="button"
+                        class="filter-action-btn"
+                        (click)="clearFilter()"
+                        matTooltip="Clear filter"
+                        aria-label="Clear filter">
+                        <mat-icon>close</mat-icon>
+                    </button>
+                }
+            </div>
+        }
+        @default {
+            <div class="invalid-filter">
+                <span>Unsupported filter type</span>
+            </div>
+        }
+    }
+</div>

@@ -1,0 +1,399 @@
+<!-- Shared Templates -->
+
+<!-- Header Cell Template: title, sort toggle, filter icon, filter overlay -->
+<ng-template #headerCellContent let-column="column" let-columnIndex="columnIndex">
+    @if (!!column.headerTemplate) {
+        <ng-container [ngTemplateOutlet]="column.headerTemplate" />
+    }
+    @if (!column.headerTemplate) {
+        <div [class.sort-header]="!disableSort()" [style.text-align]="column.textAlign">
+            {{ column?.title }}
+            @if (!disableSort() && !column?.disableColumnSort && !!column?.dataKey && !column?.hideSortIndicator) {
+                <mat-icon
+                    class="header-button"
+                    [inline]="true"
+                    [fontIcon]="getColumnSortIcon(column)"
+                    (click)="sortColumn(column)" />
+            }
+            @if (!!enableFilters() && column.filterTemplate) {
+                <mat-icon
+                    class="header-button"
+                    cdkOverlayOrigin
+                    #filterOrigin="cdkOverlayOrigin"
+                    (click)="toggleFilterDisplay($event, column)"
+                    [inline]="true">
+                    filter_alt
+                </mat-icon>
+                <ng-template
+                    cdkConnectedOverlay
+                    [cdkConnectedOverlayOrigin]="filterOrigin"
+                    [cdkConnectedOverlayOpen]="editFilterTarget() === column"
+                    [cdkConnectedOverlayPositions]="filterOverlayPositions"
+                    [cdkConnectedOverlayHasBackdrop]="true"
+                    cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
+                    (backdropClick)="closeFilter()">
+                    <div class="filter-overlay-panel">
+                        <ng-container [ngTemplateOutlet]="column.filterTemplate" />
+                    </div>
+                </ng-template>
+            }
+        </div>
+    }
+</ng-template>
+
+<!-- Pagination spinner row (when loading additional pages) -->
+<ng-template #loadingMoreTpl>
+    <div class="loading-more-row">
+        <mat-spinner diameter="24" />
+        <span>Loading more...</span>
+    </div>
+</ng-template>
+
+<!-- Centered spinner overlay (for initial load) -->
+<ng-template #loadingOverlayTpl>
+    <div class="loading-overlay">
+        <mat-spinner diameter="48" />
+        <span>Loading...</span>
+    </div>
+</ng-template>
+
+@if (!effectiveVirtualScroll()) {
+    <!-- Standard Non-Virtual Scroll Table -->
+    <div
+        class="mat-table-wrapper"
+        [class.is-resizing]="!!isResizingColumn()"
+        [class.fit-content]="fitContent()"
+        [class.enable-row-stripes]="enableRowStripes()"
+        [class.enable-word-wrap]="enableWordWrap()">
+        <mat-table
+            #scrolltable
+            [dataSource]="items()"
+            [trackBy]="trackBy()"
+            (scroll)="onTableScroll()"
+            infiniteScroll
+            [scrollWindow]="false"
+            [fromRoot]="fromRoot()"
+            [infiniteScrollDistance]="scrollDistance()"
+            [infiniteScrollUpDistance]="scrollUpDistance()"
+            [infiniteScrollThrottle]="scrollThrottle()"
+            [infiniteScrollDisabled]="isScrollDisabled()"
+            [alwaysCallback]="true"
+            (scrolled)="loadMoreRows()?.()"
+            (scrolledUp)="scrolledUp.emit()"
+            cdkDropList
+            (cdkDropListDropped)="drop($event)"
+            [cdkDropListDisabled]="!enableDrag()"
+            [multiTemplateDataRows]="!!expandedRowTemplate()"
+            tabindex="0"
+            [attr.aria-label]="ariaLabel() || 'Scrollable data table'">
+            @if (enableDrag()) {
+                <ng-container [matColumnDef]="'drag'">
+                    <mat-header-cell *matHeaderCellDef class="drag-column" />
+                    <mat-cell *matCellDef="let data; index as i" class="drag-column">
+                        <mat-icon class="drag-icon" cdkDragHandle>drag_indicator</mat-icon>
+                    </mat-cell>
+                </ng-container>
+            }
+            @if (isRowSelected()) {
+                <ng-container [matColumnDef]="'selection'">
+                    <mat-header-cell *matHeaderCellDef class="checkbox-column">
+                        <mat-checkbox
+                            [checked]="allSelected()"
+                            (change)="selectAll()"
+                            (click)="$event.stopPropagation()"
+                            [disabled]="multiselectReadonly()" />
+                    </mat-header-cell>
+                    <mat-cell
+                        *matCellDef="let data; index as i"
+                        class="checkbox-column"
+                        [matTooltip]="rowSelectableTooltip() ? rowSelectableTooltip()!(data, i) : ''">
+                        <span
+                            class="checkbox-tooltip-wrapper"
+                            [matTooltip]="rowSelectableTooltip() ? rowSelectableTooltip()!(data, i) : ''">
+                            <mat-checkbox
+                                [checked]="
+                                    (isRowSelectable() ? isRowSelectable()!(data, i) : true) &&
+                                    (isRowSelected() ? isRowSelected()!(i) : allSelected())
+                                "
+                                (change)="selectRow(i)"
+                                (click)="$event.stopPropagation()"
+                                [disabled]="
+                                    multiselectReadonly() || (isRowSelectable() ? !isRowSelectable()!(data, i) : false)
+                                " />
+                        </span>
+                    </mat-cell>
+                </ng-container>
+            }
+
+            @if (!!expandedRowTemplate()) {
+                <ng-container [matColumnDef]="'expand'">
+                    <mat-header-cell *matHeaderCellDef class="button-column" />
+                    <mat-cell *matCellDef="let element; index as i" class="button-column">
+                        <mat-icon
+                            class="expand-icon"
+                            [matTooltip]="'Click to toggle row expansion'"
+                            (click)="toggleExpandedRow(element, $event)">
+                            {{ (element | isRowExpanded: expandedRows) ? 'keyboard_arrow_up' : 'keyboard_arrow_down' }}
+                        </mat-icon>
+                    </mat-cell>
+                </ng-container>
+            }
+
+            @if (!!expandedRowTemplate()) {
+                <ng-container matColumnDef="expandedRow">
+                    <mat-header-cell *matHeaderCellDef />
+                    <td mat-cell *matCellDef="let element" [attr.colspan]="(templateColumns() || []).length + 1">
+                        <div class="expansion-content" [class.expansion-show]="element | isRowExpanded: expandedRows">
+                            <ng-container
+                                [ngTemplateOutlet]="expandedRowTemplate()"
+                                [ngTemplateOutletContext]="{ $implicit: element }" />
+                        </div>
+                    </td>
+                </ng-container>
+            }
+
+            @for (entry of visibleTemplateColumns(); track entry.col; let columnIndex = $index) {
+                <ng-container [matColumnDef]="entry.col.title || entry.idx.toString()" [sticky]="!!entry.col.sticky" [stickyEnd]="!!entry.col.stickyEnd">
+                    <mat-header-cell
+                        *matHeaderCellDef
+                        mat-sort-header
+                        ngxClickOutside
+                        (ngxClickOutside)="clearFilterTargetIfMatches(columnIndex, entry.col)"
+                        [class.filter-set-highlight]="!!entry.col.filterEnabled && entry.col.filterEnabled()"
+                        [class.edit-filter-highlight]="editFilterTarget() === entry.col"
+                        [style.flex]="getColumnWidth(entry.col, entry.idx) ? '0 0 ' + getColumnWidth(entry.col, entry.idx) + 'px' : entry.col.flex"
+                        [style.min-width.px]="getColumnWidth(entry.col, entry.idx)"
+                        [style.max-width.px]="getColumnWidth(entry.col, entry.idx) ?? (entry.col.maxWidth ?? maxColumnWidth())">
+                        <ng-container
+                            [ngTemplateOutlet]="headerCellContent"
+                            [ngTemplateOutletContext]="{ column: entry.col, columnIndex: columnIndex }" />
+                        @if (entry.col.resizable !== false) {
+                            <div
+                                class="col-resize-handle"
+                                (mousedown)="startColumnResize($event, entry.col, entry.idx)"
+                                (click)="$event.stopPropagation()"></div>
+                        }
+                    </mat-header-cell>
+                    <mat-cell
+                        *matCellDef="let data; let cellIndex = index"
+                        (click)="rowActionClick(cellIndex, entry.col?.dataKey, $event)"
+                        [style.flex]="getColumnWidth(entry.col, entry.idx) ? '0 0 ' + getColumnWidth(entry.col, entry.idx) + 'px' : entry.col.flex"
+                        [style.min-width.px]="getColumnWidth(entry.col, entry.idx)"
+                        [style.max-width.px]="getColumnWidth(entry.col, entry.idx) ?? (entry.col.maxWidth ?? maxColumnWidth())"
+                        [style.text-align]="entry.col.textAlign">
+                        <ng-container
+                            [ngTemplateOutlet]="entry.col.template"
+                            [ngTemplateOutletContext]="{ $implicit: data, index: cellIndex }" />
+                    </mat-cell>
+                </ng-container>
+            }
+
+            @if (showHeaders()) {
+                <mat-header-row *matHeaderRowDef="columnKeys(); sticky: true" />
+            }
+
+            <mat-row
+                *matRowDef="let row; columns: columnKeys(); let i = index"
+                cdkDrag
+                [cdkDragData]="row"
+                [class.interactive]="interactive()"
+                [attr.tabindex]="interactive() ? 0 : null"
+                [attr.aria-selected]="isRowSelected() ? isRowSelected()!(i) : null"
+                (keydown)="onRowKeyDown($event, row, i)">
+                <div class="cdk-drag-placeholder" *cdkDragPlaceholder></div>
+            </mat-row>
+
+            @if (!!expandedRowTemplate()) {
+                <mat-row *matRowDef="let row; columns: ['expandedRow']" class="mat-expansion-row" />
+            }
+        </mat-table>
+
+        @if (!isLoading() && hasCompletedFirstLoad() && (!items() || items().length === 0)) {
+            @if (emptyTemplate()) {
+                <ng-container [ngTemplateOutlet]="emptyTemplate()!" />
+            } @else {
+                <div class="empty-table-state" role="status">
+                    <mat-icon class="empty-table-icon">inbox</mat-icon>
+                    <span class="empty-table-text">{{ emptyText() }}</span>
+                </div>
+            }
+        }
+
+        @if (isLoading() && hasCompletedFirstLoad() && items().length > 0) {
+            @if (loadingTemplate()) {
+                <ng-container [ngTemplateOutlet]="loadingTemplate()!" [ngTemplateOutletContext]="{ mode: 'more' }" />
+            } @else {
+                <ng-container [ngTemplateOutlet]="loadingMoreTpl" />
+            }
+        }
+        @if (isLoading() && (!hasCompletedFirstLoad() || !items().length)) {
+            @if (loadingTemplate()) {
+                <ng-container [ngTemplateOutlet]="loadingTemplate()!" [ngTemplateOutletContext]="{ mode: 'initial' }" />
+            } @else {
+                <ng-container [ngTemplateOutlet]="loadingOverlayTpl" />
+            }
+        }
+
+        @if (isSeekingRow()) {
+            <div class="seeking-overlay" (click)="$event.stopPropagation()">
+                <mat-spinner diameter="36" />
+                <span>Scrolling to row...</span>
+            </div>
+        }
+    </div>
+} @else {
+    <!-- High-Performance Virtual Scroll Table -->
+    <div
+        class="mat-table-wrapper virtual-scroll-wrapper"
+        [class.is-resizing]="!!isResizingColumn()"
+        [class.fit-content]="fitContent()"
+        [class.enable-row-stripes]="enableRowStripes()"
+        [class.enable-word-wrap]="enableWordWrap()">
+        @if (showHeaders()) {
+            <div class="virtual-header-wrapper" #virtualHeaderWrapper>
+                <mat-table [dataSource]="[]" class="virtual-header-table">
+                    @if (isRowSelected()) {
+                        <ng-container [matColumnDef]="'selection'">
+                            <mat-header-cell *matHeaderCellDef class="checkbox-column">
+                                <mat-checkbox
+                                    [checked]="allSelected()"
+                                    (change)="selectAll()"
+                                    (click)="$event.stopPropagation()"
+                                    [disabled]="multiselectReadonly()" />
+                            </mat-header-cell>
+                        </ng-container>
+                    }
+
+                    @for (entry of visibleTemplateColumns(); track entry.col; let columnIndex = $index) {
+                        <ng-container [matColumnDef]="entry.col.title || entry.idx.toString()" [sticky]="!!entry.col.sticky" [stickyEnd]="!!entry.col.stickyEnd">
+                            <mat-header-cell
+                                *matHeaderCellDef
+                                mat-sort-header
+                                ngxClickOutside
+                                (ngxClickOutside)="clearFilterTargetIfMatches(columnIndex, entry.col)"
+                                [class.filter-set-highlight]="!!entry.col.filterEnabled && entry.col.filterEnabled()"
+                                [class.edit-filter-highlight]="editFilterTarget() === entry.col"
+                                [style.flex]="getColumnWidth(entry.col, entry.idx) ? '0 0 ' + getColumnWidth(entry.col, entry.idx) + 'px' : entry.col.flex"
+                                [style.min-width.px]="getColumnWidth(entry.col, entry.idx)"
+                                [style.max-width.px]="getColumnWidth(entry.col, entry.idx) ?? (entry.col.maxWidth ?? maxColumnWidth())">
+                                <ng-container
+                                    [ngTemplateOutlet]="headerCellContent"
+                                    [ngTemplateOutletContext]="{ column: entry.col, columnIndex: columnIndex }" />
+                                @if (entry.col.resizable !== false) {
+                                    <div
+                                        class="col-resize-handle"
+                                        (mousedown)="startColumnResize($event, entry.col, entry.idx)"
+                                        (click)="$event.stopPropagation()"></div>
+                                }
+                            </mat-header-cell>
+                        </ng-container>
+                    }
+
+                    <mat-header-row *matHeaderRowDef="virtualColumnKeys(); sticky: true" />
+                </mat-table>
+            </div>
+        }
+
+        <cdk-virtual-scroll-viewport
+            #virtualViewport
+            class="virtual-viewport"
+            tabindex="0"
+            role="group"
+            [attr.aria-label]="ariaLabel() || 'Scrollable data table'">
+            <mat-table [dataSource]="virtualVisibleItems()" [trackBy]="trackBy()" class="virtual-body-table">
+                @if (isRowSelected()) {
+                    <ng-container [matColumnDef]="'selection'">
+                        <mat-cell
+                            *matCellDef="let data; index as i"
+                            class="checkbox-column"
+                            [matTooltip]="
+                                rowSelectableTooltip() ? rowSelectableTooltip()!(data, i + virtualRangeStart()) : ''
+                            ">
+                            <span
+                                class="checkbox-tooltip-wrapper"
+                                [matTooltip]="
+                                    rowSelectableTooltip() ? rowSelectableTooltip()!(data, i + virtualRangeStart()) : ''
+                                ">
+                                <mat-checkbox
+                                    [checked]="
+                                        (isRowSelectable()
+                                            ? isRowSelectable()!(data, i + virtualRangeStart())
+                                            : true) &&
+                                        (isRowSelected() ? isRowSelected()!(i + virtualRangeStart()) : allSelected())
+                                    "
+                                    (change)="selectRow(i + virtualRangeStart())"
+                                    (click)="$event.stopPropagation()"
+                                    [disabled]="
+                                        multiselectReadonly() ||
+                                        (isRowSelectable() ? !isRowSelectable()!(data, i + virtualRangeStart()) : false)
+                                    " />
+                            </span>
+                        </mat-cell>
+                    </ng-container>
+                }
+
+                @for (entry of visibleTemplateColumns(); track entry.col; let columnIndex = $index) {
+                    <ng-container [matColumnDef]="entry.col.title || entry.idx.toString()">
+                        <mat-cell
+                            *matCellDef="let data; let cellIndex = index"
+                            (click)="rowActionClick(cellIndex + virtualRangeStart(), entry.col?.dataKey, $event)"
+                            [style.flex]="getColumnWidth(entry.col, entry.idx) ? '0 0 ' + getColumnWidth(entry.col, entry.idx) + 'px' : entry.col.flex"
+                            [style.min-width.px]="getColumnWidth(entry.col, entry.idx)"
+                            [style.max-width.px]="getColumnWidth(entry.col, entry.idx) ?? (entry.col.maxWidth ?? maxColumnWidth())"
+                            [style.text-align]="entry.col.textAlign">
+                            <ng-container
+                                [ngTemplateOutlet]="entry.col.template"
+                                [ngTemplateOutletContext]="{
+                                    $implicit: data,
+                                    index: cellIndex + virtualRangeStart()
+                                }" />
+                        </mat-cell>
+                    </ng-container>
+                }
+
+                <mat-row
+                    *matRowDef="let row; columns: virtualColumnKeys(); let i = index"
+                    [class.interactive]="interactive()"
+                    [class.virtual-row-even]="(i + virtualRangeStart()) % 2 === 0"
+                    [class.virtual-row-odd]="(i + virtualRangeStart()) % 2 !== 0"
+                    [attr.data-row-index]="i + virtualRangeStart()"
+                    [attr.tabindex]="interactive() ? 0 : null"
+                    [attr.aria-selected]="isRowSelected() ? isRowSelected()!(i + virtualRangeStart()) : null"
+                    (keydown)="onRowKeyDown($event, row, i + virtualRangeStart())" />
+            </mat-table>
+        </cdk-virtual-scroll-viewport>
+
+        @if (!isLoading() && hasCompletedFirstLoad() && (!items() || items().length === 0)) {
+            @if (emptyTemplate()) {
+                <ng-container [ngTemplateOutlet]="emptyTemplate()!" />
+            } @else {
+                <div class="empty-table-state" role="status">
+                    <mat-icon class="empty-table-icon">inbox</mat-icon>
+                    <span class="empty-table-text">{{ emptyText() }}</span>
+                </div>
+            }
+        }
+
+        @if (isLoading() && hasCompletedFirstLoad() && items().length > 0) {
+            @if (loadingTemplate()) {
+                <ng-container [ngTemplateOutlet]="loadingTemplate()!" [ngTemplateOutletContext]="{ mode: 'more' }" />
+            } @else {
+                <ng-container [ngTemplateOutlet]="loadingMoreTpl" />
+            }
+        }
+        @if (isLoading() && (!hasCompletedFirstLoad() || !items().length)) {
+            @if (loadingTemplate()) {
+                <ng-container [ngTemplateOutlet]="loadingTemplate()!" [ngTemplateOutletContext]="{ mode: 'initial' }" />
+            } @else {
+                <ng-container [ngTemplateOutlet]="loadingOverlayTpl" />
+            }
+        }
+
+        @if (isSeekingRow()) {
+            <div class="seeking-overlay" (click)="$event.stopPropagation()">
+                <mat-spinner diameter="36" />
+                <span>Scrolling to row...</span>
+            </div>
+        }
+    </div>
+}

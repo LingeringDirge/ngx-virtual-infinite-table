@@ -1,0 +1,394 @@
+<div class="demo-container" [class.dark-theme]="isDarkMode()" [class.dark]="isDarkMode()">
+
+    <!-- ── Header ────────────────────────────────────────────────────────── -->
+    <header class="demo-header">
+        <div class="header-left">
+            <mat-icon class="logo-icon">grid_on</mat-icon>
+            <div>
+                <h1>ngx-infinite-scroll-table</h1>
+                <p class="subtitle">High-performance Angular grid — virtual scroll, infinite pagination, resize, filtering & more</p>
+            </div>
+        </div>
+        <div class="header-right">
+            <button mat-icon-button (click)="toggleDarkMode()" [matTooltip]="isDarkMode() ? 'Light mode' : 'Dark mode'">
+                <mat-icon>{{ isDarkMode() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+            </button>
+            <a mat-stroked-button href="https://github.com/LingeringDirge/Custom-Material-Infinite-Scroll-Table" target="_blank">
+                <mat-icon>code</mat-icon>
+                GitHub
+            </a>
+        </div>
+    </header>
+
+    <!-- ── Toolbar ─────────────────────────────────────────────────────────── -->
+    <section class="demo-toolbar">
+
+        <!-- Group 1: Scroll & Layout -->
+        <div class="toolbar-group">
+            <mat-slide-toggle [checked]="isVirtualScroll()" (change)="toggleVirtualMode()" color="primary">
+                {{ isVirtualScroll() ? 'Virtual Scroll (5,000 rows)' : 'Infinite Scroll (paged)' }}
+            </mat-slide-toggle>
+            <mat-slide-toggle [(ngModel)]="enableRowStripes" color="primary">Stripes</mat-slide-toggle>
+            <mat-slide-toggle [(ngModel)]="fitContent" color="primary">Fit Content</mat-slide-toggle>
+            <mat-slide-toggle [(ngModel)]="enableWordWrap" color="primary">Word Wrap</mat-slide-toggle>
+        </div>
+
+        <!-- Group 2: Features -->
+        <div class="toolbar-group">
+            <mat-slide-toggle [(ngModel)]="enableSelection" color="primary">Row Selection</mat-slide-toggle>
+            @if (!isVirtualScroll()) {
+                <mat-slide-toggle [(ngModel)]="enableDrag" color="primary">DnD Reorder</mat-slide-toggle>
+                <mat-slide-toggle [(ngModel)]="enableExpansion" color="primary">Expand Rows</mat-slide-toggle>
+            }
+        </div>
+
+        <!-- Group 3: Actions -->
+        <div class="toolbar-group actions-group">
+            <!-- Column Picker -->
+            <button mat-stroked-button [matMenuTriggerFor]="colMenu">
+                <mat-icon>view_column</mat-icon>
+                Columns
+            </button>
+            <mat-menu #colMenu="matMenu">
+                @for (col of allColumns; track col) {
+                    <button mat-menu-item (click)="toggleColumnVisible(col)">
+                        <mat-icon>{{ isColHidden(col) ? 'check_box_outline_blank' : 'check_box' }}</mat-icon>
+                        {{ col }}
+                    </button>
+                }
+                <button mat-menu-item (click)="resetWidths()">
+                    <mat-icon>width_normal</mat-icon>
+                    Reset Column Widths
+                </button>
+            </mat-menu>
+
+            <!-- Seek -->
+            <div class="seek-box">
+                <input type="number" [(ngModel)]="seekRowIndex" placeholder="Row #" min="0" />
+                <button mat-flat-button color="primary" (click)="triggerSeek()">
+                    Seek to Row
+                </button>
+            </div>
+
+            <!-- Expand/Collapse all -->
+            @if (enableExpansion() && !isVirtualScroll()) {
+                <button mat-stroked-button (click)="expandAll()">
+                    <mat-icon>unfold_more</mat-icon>
+                    Expand All
+                </button>
+                <button mat-stroked-button (click)="collapseAll()">
+                    <mat-icon>unfold_less</mat-icon>
+                    Collapse All
+                </button>
+            }
+
+            <!-- CSV Export -->
+            <button mat-stroked-button (click)="exportCsv()">
+                <mat-icon>download</mat-icon>
+                Export CSV
+            </button>
+
+            <!-- Clear Selection -->
+            @if (selectedRowIds().size > 0) {
+                <button mat-stroked-button (click)="clearSelection()">
+                    <mat-icon>deselect</mat-icon>
+                    Clear Selection
+                </button>
+            }
+
+            <button mat-stroked-button (click)="resetAndLoad()">
+                <mat-icon>refresh</mat-icon>
+                Reset
+            </button>
+        </div>
+    </section>
+
+    <!-- ── Status Bar ──────────────────────────────────────────────────────── -->
+    <div class="status-bar">
+        <span class="status-chip">
+            <strong>Loaded:</strong>&nbsp;{{ displayedProducts().length }} / 5,000 rows
+        </span>
+        @if (selectedRowIds().size > 0) {
+            <span class="status-chip highlight">
+                <strong>Selected:</strong>&nbsp;{{ selectedRowIds().size }} rows
+            </span>
+        }
+        @if (sortField()) {
+            <span class="status-chip">
+                <strong>Sort:</strong>&nbsp;{{ sortField() }} ({{ sortDirection() === 1 ? 'Asc' : 'Desc' }})
+            </span>
+        }
+        @if (hiddenColumnSet().size > 0) {
+            <span class="status-chip muted">
+                <strong>Hidden cols:</strong>&nbsp;{{ hiddenColumnSet().size }}
+            </span>
+        }
+        <span class="status-chip hint">
+            <mat-icon class="hint-icon">drag_indicator</mat-icon>
+            Drag column edges to resize
+        </span>
+    </div>
+
+    <!-- ── Table ───────────────────────────────────────────────────────────── -->
+    <main class="table-card">
+        <ngx-infinite-scroll-table
+            #table
+            [items]="displayedProducts()"
+            [loadMoreRows]="loadMoreRows"
+            [hasMoreData]="hasMoreData()"
+            [isLoading]="isLoading()"
+            [enableFilters]="true"
+            [enableVirtualScroll]="isVirtualScroll()"
+            [virtualRowHeight]="48"
+            [enableDrag]="enableDrag()"
+            [enableRowStripes]="enableRowStripes()"
+            [fitContent]="fitContent()"
+            [enableWordWrap]="enableWordWrap()"
+            [isRowSelected]="enableSelection() ? isRowSelected : undefined"
+            [expandedRowTemplate]="enableExpansion() && !isVirtualScroll() ? rowDetailTpl : null"
+            [emptyText]="'No products match your filters'"
+            (sortChanged)="onSortChange($event)"
+            (rowSelected)="onRowSelected($event)"
+            (allRowsSelected)="onAllRowsSelected($event)"
+            (rowDropped)="onRowDropped($event)">
+
+            <!-- ID Column (sticky left, not resizable) -->
+            <ng-template
+                ngxInfiniteScrollColumn
+                title="ID"
+                dataKey="id"
+                width="72px"
+                textAlign="center"
+                [sticky]="true"
+                [resizable]="false"
+                let-row>
+                <span class="id-badge">#{{ row.id }}</span>
+            </ng-template>
+
+            <!-- Product Name with Text Filter -->
+            <ng-template
+                ngxInfiniteScrollColumn
+                title="Product Name"
+                dataKey="title"
+                width="240px"
+                [filterTemplate]="titleFilterTpl"
+                let-row>
+                <div class="product-cell">
+                    <strong>{{ row.title }}</strong>
+                </div>
+            </ng-template>
+
+            <!-- Category with Single Select Filter -->
+            <ng-template
+                ngxInfiniteScrollColumn
+                title="Category"
+                dataKey="category"
+                width="150px"
+                [filterTemplate]="categoryFilterTpl"
+                let-row>
+                <span class="category-chip">{{ row.category }}</span>
+            </ng-template>
+
+            <!-- Price with Currency Filter -->
+            <ng-template
+                ngxInfiniteScrollColumn
+                title="Price"
+                dataKey="price"
+                width="110px"
+                textAlign="right"
+                [filterTemplate]="priceFilterTpl"
+                let-row>
+                <span class="price-text">${{ row.price.toFixed(2) }}</span>
+            </ng-template>
+
+            <!-- Stock with Numeric Filter -->
+            <ng-template
+                ngxInfiniteScrollColumn
+                title="Stock"
+                dataKey="stock"
+                width="100px"
+                textAlign="right"
+                [filterTemplate]="stockFilterTpl"
+                let-row>
+                <div class="stock-bar-cell">
+                    <span>{{ row.stock }}</span>
+                    <div class="stock-bar" [style.width.%]="(row.stock / 150) * 100"></div>
+                </div>
+            </ng-template>
+
+            <!-- In Stock with Boolean Filter -->
+            <ng-template
+                ngxInfiniteScrollColumn
+                title="Status"
+                dataKey="inStock"
+                width="110px"
+                textAlign="center"
+                [filterTemplate]="inStockFilterTpl"
+                let-row>
+                <span class="status-pill" [class.in-stock]="row.inStock" [class.out-of-stock]="!row.inStock">
+                    {{ row.inStock ? 'In Stock' : 'Sold Out' }}
+                </span>
+            </ng-template>
+
+            <!-- Date Added -->
+            <ng-template
+                ngxInfiniteScrollColumn
+                title="Date Added"
+                dataKey="createdDate"
+                width="130px"
+                textAlign="center"
+                let-row>
+                {{ row.createdDate }}
+            </ng-template>
+
+            <!-- Rating (sticky right, no filter) -->
+            <ng-template
+                ngxInfiniteScrollColumn
+                title="Rating"
+                dataKey="rating"
+                width="90px"
+                textAlign="center"
+                [stickyEnd]="true"
+                let-row>
+                <span class="rating-badge">&#9733; {{ row.rating }}</span>
+            </ng-template>
+        </ngx-infinite-scroll-table>
+    </main>
+
+    <!-- ── Feature Callouts ────────────────────────────────────────────────── -->
+    <section class="features-grid">
+        <div class="feature-card">
+            <mat-icon>swap_vert</mat-icon>
+            <h3>Column Sorting</h3>
+            <p>Click any column header to cycle Desc → Asc → None. Pre-sort via <code>preSortDirection</code>.</p>
+        </div>
+        <div class="feature-card">
+            <mat-icon>filter_alt</mat-icon>
+            <h3>Column Filters</h3>
+            <p>Text, numeric range, currency, date range, boolean, single-select &amp; multi-select overlays.</p>
+        </div>
+        <div class="feature-card">
+            <mat-icon>view_column</mat-icon>
+            <h3>Column Visibility</h3>
+            <p>Show or hide any column at runtime with <code>hideColumn(key)</code> / <code>showColumn(key)</code>. Build your own picker UI.</p>
+        </div>
+        <div class="feature-card">
+            <mat-icon>width_normal</mat-icon>
+            <h3>Column Resizing</h3>
+            <p>Drag the right edge of any header to resize. Persists per session. Reset with <code>resetColumnWidths()</code>.</p>
+        </div>
+        <div class="feature-card">
+            <mat-icon>push_pin</mat-icon>
+            <h3>Sticky Columns</h3>
+            <p>Pin columns to the left (<code>[sticky]="true"</code>) or right (<code>[stickyEnd]="true"</code>) edge while the center scrolls.</p>
+        </div>
+        <div class="feature-card">
+            <mat-icon>expand_more</mat-icon>
+            <h3>Expandable Rows</h3>
+            <p>Master-detail accordions. Programmatically expand/collapse all via <code>expandAllRows()</code> / <code>collapseAllRows()</code>.</p>
+        </div>
+        <div class="feature-card">
+            <mat-icon>checklist</mat-icon>
+            <h3>Row Selection</h3>
+            <p>Per-row checkboxes with selectAll, indeterminate state. Disable individual rows with <code>isRowSelectable</code>.</p>
+        </div>
+        <div class="feature-card">
+            <mat-icon>drag_indicator</mat-icon>
+            <h3>Drag & Drop Reorder</h3>
+            <p>CDK-powered row reordering. Toggle with the DnD button above.</p>
+        </div>
+        <div class="feature-card">
+            <mat-icon>speed</mat-icon>
+            <h3>Virtual Scroll</h3>
+            <p>CDK virtual scroll renders 5,000+ rows with a tiny DOM. Toggle to see the difference.</p>
+        </div>
+        <div class="feature-card">
+            <mat-icon>travel_explore</mat-icon>
+            <h3>Seek to Row</h3>
+            <p>Jump to any row index — even un-fetched pages — via <code>scrollToRow(index)</code>.</p>
+        </div>
+        <div class="feature-card">
+            <mat-icon>download</mat-icon>
+            <h3>CSV Export</h3>
+            <p>Zero-dependency <code>exportToCsv()</code> utility with custom formatters and filename.</p>
+        </div>
+        <div class="feature-card">
+            <mat-icon>accessibility</mat-icon>
+            <h3>Keyboard & a11y</h3>
+            <p>Focusable rows with <code>tabindex</code>, <code>aria-selected</code>, Space/Enter keyboard triggers.</p>
+        </div>
+    </section>
+
+    <!-- ── Filter Templates ────────────────────────────────────────────────── -->
+    <ng-template #titleFilterTpl>
+        <ngx-infinite-scroll-table-filter
+            dataKey="title"
+            columnName="Product Name"
+            type="text"
+            [scrollTable]="table()"
+            [filterValue]="activeFilters()['title']"
+            (filterChanged)="onFilterChange($event)" />
+    </ng-template>
+
+    <ng-template #categoryFilterTpl>
+        <ngx-infinite-scroll-table-filter
+            dataKey="category"
+            columnName="Category"
+            type="singleselect"
+            [scrollTable]="table()"
+            [filterValue]="{
+                options: ['Electronics', 'Home & Kitchen', 'Books', 'Clothing', 'Sports', 'Automotive', 'Health & Beauty'],
+                singleselect: activeFilters()['category']?.['singleselect']
+            }"
+            (filterChanged)="onFilterChange($event)" />
+    </ng-template>
+
+    <ng-template #priceFilterTpl>
+        <ngx-infinite-scroll-table-filter
+            dataKey="price"
+            columnName="Price"
+            type="currency"
+            [scrollTable]="table()"
+            [filterValue]="activeFilters()['price']"
+            (filterChanged)="onFilterChange($event)" />
+    </ng-template>
+
+    <ng-template #stockFilterTpl>
+        <ngx-infinite-scroll-table-filter
+            dataKey="stock"
+            columnName="Stock"
+            type="numeric"
+            [scrollTable]="table()"
+            [filterValue]="activeFilters()['stock']"
+            (filterChanged)="onFilterChange($event)" />
+    </ng-template>
+
+    <ng-template #inStockFilterTpl>
+        <ngx-infinite-scroll-table-filter
+            dataKey="inStock"
+            columnName="Availability"
+            type="boolean"
+            [scrollTable]="table()"
+            [filterValue]="activeFilters()['inStock']"
+            (filterChanged)="onFilterChange($event)" />
+    </ng-template>
+
+    <!-- Expandable Row Detail Template -->
+    <ng-template #rowDetailTpl let-item>
+        <div class="row-detail-content">
+            <div class="detail-header">
+                <h4>{{ item.title }}</h4>
+                <div class="rating-large">&#9733; {{ item.rating }} / 5.0</div>
+            </div>
+            <p class="description">{{ item.description }}</p>
+            <div class="detail-footer">
+                <span>SKU: #{{ item.id }}-{{ item.category.slice(0, 3).toUpperCase() }}</span>
+                <span>Category: {{ item.category }}</span>
+                <span>Created: {{ item.createdDate }}</span>
+                <span>Unit Price: ${{ item.price.toFixed(2) }}</span>
+                <span>Stock: {{ item.stock }} units</span>
+            </div>
+        </div>
+    </ng-template>
+
+</div>

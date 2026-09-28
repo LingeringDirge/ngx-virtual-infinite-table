@@ -67,6 +67,7 @@
                     will-change: transform;
                     box-sizing: border-box;
                     min-height: var(--ist-virtual-row-height, 48px);
+                    contain: layout paint;
                 }
             }
 
@@ -79,6 +80,8 @@
                 z-index: 1;
                 background-color: var(--mat-sys-surface, #ffffff);
                 contain: strict;
+                will-change: scroll-position;
+                -webkit-overflow-scrolling: touch;
 
                 ::ng-deep .cdk-virtual-scroll-content-wrapper {
                     min-width: 100%;

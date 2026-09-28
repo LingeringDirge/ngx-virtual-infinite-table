@@ -50,6 +50,7 @@ export class VirtualScrollController<T = unknown> {
     private columnWidthCache: number[] = [];
     private widthSyncScheduled = false;
     private lastScrollOffset = 0;
+    private lastScrollLeft = -1;
     private lastWordWrapState: boolean | null = null;
     private cacheStable = false;
     private viewport: CdkVirtualScrollViewport | null = null;
@@ -139,6 +140,12 @@ export class VirtualScrollController<T = unknown> {
 
         this.rangeSub = viewport.renderedRangeStream.pipe(takeUntilDestroyed(this.config.destroyRef)).subscribe((range) => {
             const allItems = this.config.getItems() ?? [];
+            if (allItems.length > 0 && range.end === 0) {
+                const vpHeight = viewport.getViewportSize() || 500;
+                const visibleCount = Math.ceil(vpHeight / this.effectiveItemSize);
+                const buffer = this.config.getVirtualScrollBuffer();
+                range = { start: 0, end: Math.min(allItems.length, visibleCount + buffer) };
+            }
             this.config.visibleItems.set(allItems.slice(range.start, range.end));
             this.config.rangeStart.set(range.start);
             this.checkLoadMore(range, allItems.length);
@@ -154,7 +161,9 @@ export class VirtualScrollController<T = unknown> {
                     this.measureAndUpdateRowHeight();
                 }
             });
-            this.scheduleWidthSync();
+            if (!this.cacheStable) {
+                this.scheduleWidthSync();
+            }
         });
 
         this.config.ngZone.runOutsideAngular(() => {
@@ -209,26 +218,26 @@ export class VirtualScrollController<T = unknown> {
         const headerWrapperEl = this.headerWrapper?.nativeElement;
         if (!vpEl || !headerWrapperEl) return;
 
+        const currentLeft = vpEl.scrollLeft;
+        if (currentLeft === this.lastScrollLeft) return;
+        this.lastScrollLeft = currentLeft;
+
         const headerTable = headerWrapperEl.querySelector('mat-table') as HTMLElement;
         if (headerTable) {
-            headerTable.style.transform = `translateX(-${vpEl.scrollLeft}px)`;
+            headerTable.style.transform = `translateX(-${currentLeft}px)`;
         }
     }
 
     private updateScrollingState(): void {
         if (!this.config.isScrolling()) {
-            this.config.ngZone.run(() => {
-                this.config.isScrolling.set(true);
-            });
+            this.config.isScrolling.set(true);
         }
         if (this.scrollingTimer) {
             clearTimeout(this.scrollingTimer);
         }
         this.scrollingTimer = setTimeout(() => {
-            this.config.ngZone.run(() => {
-                this.config.isScrolling.set(false);
-                this.config.cdr.markForCheck();
-            });
+            this.config.isScrolling.set(false);
+            this.config.cdr.markForCheck();
         }, 150);
     }
 
@@ -275,15 +284,6 @@ export class VirtualScrollController<T = unknown> {
         if (!bodyTable || !headerTable) return;
 
         if (this.cacheStable) {
-            const allBodyRows: NodeListOf<HTMLElement> = vpEl.querySelectorAll('mat-row');
-            allBodyRows.forEach((row) => {
-                const cells = row.querySelectorAll('mat-cell') as NodeListOf<HTMLElement>;
-                cells.forEach((cell, i) => {
-                    if (this.columnWidthCache[i]) {
-                        cell.style.minWidth = `${this.columnWidthCache[i]}px`;
-                    }
-                });
-            });
             headerTable.style.transform = `translateX(-${vpEl.scrollLeft}px)`;
             return;
         }

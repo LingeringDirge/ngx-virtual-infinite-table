@@ -30,13 +30,13 @@
                 (change)="onModeChange($event.value)"
                 class="mode-toggle-group"
                 aria-label="Table scrolling mode">
-                <mat-button-toggle value="virtual" matTooltip="Virtual scrolling: ultra high performance for large datasets (5,000 rows)">
+                <mat-button-toggle value="virtual" matTooltip="Virtualized Infinite: virtualized DOM rendering with seamless infinite paging (default)">
                     <mat-icon class="toggle-icon">bolt</mat-icon>
-                    <span>Virtual Scroll (5k rows)</span>
+                    <span>Virtualized Infinite</span>
                 </mat-button-toggle>
-                <mat-button-toggle value="infinite" matTooltip="Infinite scrolling: loads pages sequentially as you scroll near bottom">
-                    <mat-icon class="toggle-icon">all_inclusive</mat-icon>
-                    <span>Infinite Scroll (paged)</span>
+                <mat-button-toggle value="infinite" matTooltip="Standard Infinite: non-virtualized table with infinite pagination">
+                    <mat-icon class="toggle-icon">view_stream</mat-icon>
+                    <span>Standard Infinite</span>
                 </mat-button-toggle>
             </mat-button-toggle-group>
         </div>
@@ -118,8 +118,11 @@
 
     <!-- ── Status Bar ──────────────────────────────────────────────────────── -->
     <div class="status-bar">
-        <span class="status-chip" matTooltip="Total rows currently loaded in dataset">
+        <span class="status-chip" matTooltip="Total rows currently loaded into table">
             <strong>Loaded:</strong>&nbsp;{{ displayedProducts().length }} / 5,000 rows
+            @if (hasMoreData()) {
+                <span class="paged-hint">(scroll to load more)</span>
+            }
         </span>
         @if (selectedRowIds().size > 0) {
             <span class="status-chip highlight" matTooltip="Number of selected rows">

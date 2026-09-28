@@ -22,7 +22,7 @@ export class TableVirtualScrollStrategy implements VirtualScrollStrategy, OnDest
 
     private dataLength = 0;
 
-    private bufferSize = 20;
+    private bufferSize = 10;
 
     /**
      * Update the number of buffer rows rendered above and below the

@@ -192,13 +192,13 @@ export class InfiniteScrollTableComponent<T = any>
     public multiselectReadonly = input<boolean>(false);
 
     /** Enables virtual scrolling for high performance on large datasets. Default false. */
-    public enableVirtualScroll = input<boolean>(false);
+    public enableVirtualScroll = input<boolean>(true);
 
     /** Estimated row height in px for virtual scroll calculation. Default 48. */
     public virtualRowHeight = input<number>(48);
 
     /** Extra rows rendered outside visible viewport to prevent blank areas while scrolling. Default 20. */
-    public virtualScrollBuffer = input<number>(20);
+    public virtualScrollBuffer = input<number>(10);
 
     /**
      * Custom row tracking function for CDK Table DOM reuse.

@@ -109,7 +109,7 @@ export class AppComponent implements OnInit {
     // ── Selection State ────────────────────────────────────────────────────
     public selectedRowIds = signal<Set<number>>(new Set<number>());
 
-    private pageSize = 50;
+    private pageSize = 100;
     private filteredDataset: ProductItem[] = [];
     private currentOffset = 0;
 
@@ -159,14 +159,12 @@ export class AppComponent implements OnInit {
         const filtered = this.applyClientSideFilters(this.allMockProducts);
         this.filteredDataset = this.applyClientSideSort(filtered);
 
-        if (this.isVirtualScroll()) {
-            this.displayedProducts.set(this.filteredDataset);
-            this.hasMoreData.set(false);
-        } else {
-            this.displayedProducts.set(this.filteredDataset.slice(0, this.pageSize));
-            this.currentOffset = this.pageSize;
-            this.hasMoreData.set(this.currentOffset < this.filteredDataset.length);
-        }
+        // Load initial page (100 rows) with virtualized infinite scrolling by default
+        const initialChunk = this.filteredDataset.slice(0, this.pageSize);
+        this.currentOffset = initialChunk.length;
+        this.displayedProducts.set(initialChunk);
+        this.hasMoreData.set(this.currentOffset < this.filteredDataset.length);
+
         this.table()?.resetScrollState();
     }
 
@@ -175,18 +173,12 @@ export class AppComponent implements OnInit {
         this.isLoading.set(true);
 
         setTimeout(() => {
-            if (this.isVirtualScroll()) {
-                this.displayedProducts.set(this.filteredDataset);
-                this.hasMoreData.set(false);
-            } else {
-                const nextChunk = this.filteredDataset.slice(this.currentOffset, this.currentOffset + this.pageSize);
-                this.currentOffset += this.pageSize;
-                this.displayedProducts.update((prev: ProductItem[]) => [...prev, ...nextChunk]);
-                this.hasMoreData.set(this.currentOffset < this.filteredDataset.length);
-            }
-
+            const nextChunk = this.filteredDataset.slice(this.currentOffset, this.currentOffset + this.pageSize);
+            this.currentOffset += nextChunk.length;
+            this.displayedProducts.update((prev: ProductItem[]) => [...prev, ...nextChunk]);
+            this.hasMoreData.set(this.currentOffset < this.filteredDataset.length);
             this.isLoading.set(false);
-        }, 50);
+        }, 40);
     };
 
     // ── Sort / Filter ──────────────────────────────────────────────────────

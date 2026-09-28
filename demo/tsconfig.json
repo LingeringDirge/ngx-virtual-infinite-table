@@ -26,10 +26,17 @@
       "ngx-virtual-infinite-table": [
         "../src/public-api.ts"
       ],
-      "*": [
-        "*",
-        "node_modules/*",
-        "../node_modules/*"
+      "@angular/*": [
+        "../node_modules/@angular/*"
+      ],
+      "rxjs": [
+        "../node_modules/rxjs"
+      ],
+      "rxjs/*": [
+        "../node_modules/rxjs/*"
+      ],
+      "ngx-infinite-scroll": [
+        "../node_modules/ngx-infinite-scroll"
       ]
     }
   },

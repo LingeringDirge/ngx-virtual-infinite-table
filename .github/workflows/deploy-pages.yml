@@ -33,9 +33,6 @@ jobs:
       - name: Run Library Unit Tests
         run: npm test -- --silent --noStackTrace
 
-      - name: Install Demo Dependencies
-        run: cd demo && npm install
-
       - name: Build Demo Application
         run: cd demo && npx ng build --base-href /ngx-virtual-infinite-table/
 

@@ -187,7 +187,8 @@
         .mat-expansion-row {
             height: 0;
 
-            td {
+            td,
+            mat-cell {
                 border-bottom-width: 0;
                 padding: 0;
             }
@@ -399,7 +400,7 @@
 
 // Dark Mode Support
 :host-context(.dark),
-:host-context(.dark) {
+:host-context(.dark-theme) {
     .filter-overlay-panel {
         background-color: var(--mat-sys-surface-container-highest, #36343b);
         color: var(--mat-sys-on-surface, #e6e1e5);

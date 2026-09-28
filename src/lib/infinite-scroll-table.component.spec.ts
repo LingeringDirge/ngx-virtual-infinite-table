@@ -143,6 +143,20 @@ describe('InfiniteScrollTableComponent', () => {
         expect(component.isColumnHidden('Role')).toBe(false);
     });
 
+    it('should exclude hidden columns from both columnKeys and virtualColumnKeys', () => {
+        const col1 = { title: 'ColA', dataKey: 'colA', resizable: true } as any;
+        const col2 = { title: 'ColB', dataKey: 'colB', resizable: true } as any;
+        component.templateColumns.set([col1, col2]);
+
+        expect(component.columnKeys()).toEqual(['ColA', 'ColB']);
+        expect(component.virtualColumnKeys()).toEqual(['ColA', 'ColB']);
+
+        component.hideColumn('ColA');
+
+        expect(component.columnKeys()).toEqual(['ColB']);
+        expect(component.virtualColumnKeys()).toEqual(['ColB']);
+    });
+
     it('should return column definitions with hidden state', () => {
         component.hideColumn('Email');
         const defs = component.getColumnDefinitions();

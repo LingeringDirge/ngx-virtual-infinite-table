@@ -312,9 +312,8 @@ export class InfiniteScrollTableComponent<T = any>
 
     /** Column keys for virtual mode (minus drag and expansion columns). */
     public virtualColumnKeys = computed(() => {
-        const arr = this.templateColumns();
-        const dataColumns =
-            arr?.map((col: InfiniteScrollTableTemplateColumnDirective, i: number) => col.title || i.toString()) ?? [];
+        const visible = this.visibleTemplateColumns();
+        const dataColumns = visible?.map(({ col, idx }) => col.title || idx.toString()) ?? [];
         return [...(this.isRowSelected() ? ['selection'] : []), ...dataColumns];
     });
 

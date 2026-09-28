@@ -1,5 +1,5 @@
 import { CdkVirtualScrollViewport, VirtualScrollStrategy } from '@angular/cdk/scrolling';
-import { Injectable } from '@angular/core';
+import { Injectable, OnDestroy } from '@angular/core';
 import { Observable, Subject } from 'rxjs';
 import { distinctUntilChanged } from 'rxjs/operators';
 
@@ -10,7 +10,7 @@ import { distinctUntilChanged } from 'rxjs/operators';
  * rendered with `*cdkVirtualFor` (mat-table uses `*matRowDef`).
  */
 @Injectable()
-export class TableVirtualScrollStrategy implements VirtualScrollStrategy {
+export class TableVirtualScrollStrategy implements VirtualScrollStrategy, OnDestroy {
     private scrolledIndexChange$ = new Subject<number>();
 
     /** Observable that emits the first visible item index whenever it changes. */
@@ -58,6 +58,10 @@ export class TableVirtualScrollStrategy implements VirtualScrollStrategy {
     }
 
     public detach(): void {
+        this.viewport = null;
+    }
+
+    public ngOnDestroy(): void {
         this.scrolledIndexChange$.complete();
         this.viewport = null;
     }

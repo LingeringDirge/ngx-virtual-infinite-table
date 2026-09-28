@@ -2,6 +2,7 @@ import { ListRange } from '@angular/cdk/collections';
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { ChangeDetectorRef, DestroyRef, effect, ElementRef, NgZone, WritableSignal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { Subscription } from 'rxjs';
 import { TableVirtualScrollStrategy } from './table-virtual-scroll-strategy';
 
 /**
@@ -53,6 +54,8 @@ export class VirtualScrollController<T = unknown> {
     private cacheStable = false;
     private viewport: CdkVirtualScrollViewport | null = null;
     private headerWrapper: ElementRef | null = null;
+    private rangeSub?: Subscription;
+    private scrollSub?: Subscription;
 
     constructor(private readonly config: VirtualScrollControllerConfig<T>) {
         effect(() => {
@@ -94,10 +97,13 @@ export class VirtualScrollController<T = unknown> {
 
     /** Subscribes to the viewport's range and scroll streams. */
     public attach(viewport: CdkVirtualScrollViewport, headerWrapper: ElementRef | undefined): void {
+        this.rangeSub?.unsubscribe();
+        this.scrollSub?.unsubscribe();
+
         this.viewport = viewport;
         this.headerWrapper = headerWrapper ?? null;
 
-        viewport.renderedRangeStream.pipe(takeUntilDestroyed(this.config.destroyRef)).subscribe((range) => {
+        this.rangeSub = viewport.renderedRangeStream.pipe(takeUntilDestroyed(this.config.destroyRef)).subscribe((range) => {
             const allItems = this.config.getItems() ?? [];
             this.config.visibleItems.set(allItems.slice(range.start, range.end));
             this.config.rangeStart.set(range.start);
@@ -117,7 +123,7 @@ export class VirtualScrollController<T = unknown> {
             this.scheduleWidthSync();
         });
 
-        viewport
+        this.scrollSub = viewport
             .elementScrolled()
             .pipe(takeUntilDestroyed(this.config.destroyRef))
             .subscribe(() => {
@@ -129,6 +135,8 @@ export class VirtualScrollController<T = unknown> {
 
     /** Clears timers on destroy. */
     public destroy(): void {
+        this.rangeSub?.unsubscribe();
+        this.scrollSub?.unsubscribe();
         if (this.scrollingTimer) {
             clearTimeout(this.scrollingTimer);
             this.scrollingTimer = null;

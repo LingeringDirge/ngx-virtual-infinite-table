@@ -26,9 +26,13 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          cache: 'npm'
 
       - name: Install Root Dependencies
         run: npm install
+
+      - name: Run Library Unit Tests
+        run: npm test -- --silent --noStackTrace
 
       - name: Install Demo Dependencies
         run: cd demo && npm install

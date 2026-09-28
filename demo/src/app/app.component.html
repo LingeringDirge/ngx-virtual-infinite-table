@@ -338,7 +338,7 @@
             [scrollTable]="table"
             [filterValue]="{
                 options: ['Electronics', 'Home & Kitchen', 'Books', 'Clothing', 'Sports', 'Automotive', 'Health & Beauty'],
-                singleselect: activeFilters()['category']?.['singleselect']
+                singleselect: activeFilters()['category'].singleselect ?? null
             }"
             (filterChanged)="onFilterChange($event)" />
     </ng-template>

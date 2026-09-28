@@ -16,10 +16,9 @@ import {
     IInfiniteScrollSortEvent,
     IInfiniteScrollTableRowActionEvent,
     InfiniteScrollTableComponent,
-    InfiniteScrollTableFilterComponent,
-    InfiniteScrollTableTemplateColumnDirective,
+    InfiniteScrollTableModule,
     SortType
-} from '../../../src/public-api';
+} from 'ngx-virtual-infinite-table';
 
 export interface ProductItem {
     id: number;
@@ -51,9 +50,7 @@ const ALL_COLUMNS = ['ID', 'Product Name', 'Category', 'Price', 'Stock', 'Status
         MatMenuModule,
         MatSlideToggleModule,
         MatTooltipModule,
-        InfiniteScrollTableComponent,
-        InfiniteScrollTableFilterComponent,
-        InfiniteScrollTableTemplateColumnDirective
+        InfiniteScrollTableModule
     ],
     templateUrl: './app.component.html',
     styleUrls: ['./app.component.scss']

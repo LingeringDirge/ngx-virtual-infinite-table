@@ -175,3 +175,41 @@ body.dark-theme .mat-calendar {
   background-color: var(--mat-sys-surface-container-high, #1e293b) !important;
   color: var(--mat-sys-on-surface, #f8fafc) !important;
 }
+
+// ── Material 3 Tooltip Styling ────────────────────────────────────────────────
+:root {
+  --mat-sys-inverse-surface: #313033;
+  --mat-sys-inverse-on-surface: #f4eff4;
+  --mdc-plain-tooltip-container-color: #313033;
+  --mdc-plain-tooltip-supporting-text-color: #f4eff4;
+}
+
+body.dark-theme {
+  --mat-sys-inverse-surface: #e6e1e5;
+  --mat-sys-inverse-on-surface: #313033;
+  --mdc-plain-tooltip-container-color: #e6e1e5;
+  --mdc-plain-tooltip-supporting-text-color: #313033;
+}
+
+.mat-mdc-tooltip {
+  --mdc-plain-tooltip-container-color: var(--mat-sys-inverse-surface, #313033);
+  --mdc-plain-tooltip-supporting-text-color: var(--mat-sys-inverse-on-surface, #f4eff4);
+
+  .mdc-tooltip__surface {
+    background-color: var(--mat-sys-inverse-surface, #313033) !important;
+    color: var(--mat-sys-inverse-on-surface, #f4eff4) !important;
+    font-size: 12px !important;
+    line-height: 16px !important;
+    font-weight: 500 !important;
+    border-radius: 4px !important;
+    padding: 6px 10px !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25) !important;
+    opacity: 1 !important;
+  }
+}
+
+body.dark-theme .mat-mdc-tooltip .mdc-tooltip__surface {
+  background-color: var(--mat-sys-inverse-surface, #e6e1e5) !important;
+  color: var(--mat-sys-inverse-on-surface, #313033) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.6) !important;
+}

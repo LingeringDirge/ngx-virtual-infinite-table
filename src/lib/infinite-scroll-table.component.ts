@@ -92,6 +92,9 @@ export class InfiniteScrollTableComponent<T = any>
         if (vp && vp !== this._virtualViewport) {
             this._virtualViewport = vp;
             this.virtualCtrl.attach(vp, this.virtualHeaderWrapper);
+            // Reprime the strategy with current data after attach so the first
+            // renderedRangeStream emission always carries a non-zero range.
+            this.virtualCtrl.syncData(vp);
         } else if (!vp && this._virtualViewport) {
             this._virtualViewport = undefined;
             this.virtualCtrl.detach();

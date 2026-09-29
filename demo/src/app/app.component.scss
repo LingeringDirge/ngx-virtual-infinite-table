@@ -202,7 +202,10 @@
 
 // ── Table Container Card ──────────────────────────────────────────────────────
 .table-card {
-    flex: 1;
+    // The page is min-height-based, so flex: 1 gives this card a zero flex
+    // basis. Reserve a definite height so the table's 100% height chain and
+    // CDK viewport can resolve to a visible scroll area.
+    flex: 0 0 560px;
     display: flex;
     flex-direction: column;
     margin: 16px 24px;

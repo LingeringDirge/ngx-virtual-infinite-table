@@ -21,8 +21,11 @@
 
         // ── Virtual Scroll Viewport ──────────────────────────────────────────
         &.virtual-scroll-wrapper {
-            grid-template-rows: auto 1fr auto;
-            grid-template-columns: minmax(0, 1fr);
+            // A flex column gives the header its natural height and reserves
+            // all remaining card height for the CDK scroll viewport.
+            display: flex;
+            flex-direction: column;
+            min-height: 0;
 
             .virtual-header-wrapper {
                 overflow-x: clip;
@@ -72,7 +75,12 @@
             }
 
             .virtual-viewport {
-                height: 100%;
+                // The viewport consumes the flex wrapper's remaining height.
+                // min-height: 0 permits it to shrink and become the CDK scroll
+                // container rather than collapsing around virtualized content.
+                flex: 1 1 auto;
+                min-height: 0;
+                height: auto;
                 will-change: scroll-position;
                 -webkit-overflow-scrolling: touch;
                 outline: none;

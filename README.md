@@ -168,16 +168,34 @@ public loadNextPage = (): void => {
 
 ### Virtual Scroll (Large Datasets)
 
+Virtual scrolling requires a bounded-height container. The virtual viewport fills its host's available height and owns vertical scrolling; without a definite height (or a valid flex/grid height chain), the viewport has no visible area.
+
 ```html
-<ngx-virtual-infinite-table
-  [items]="allRows()"
-  [enableVirtualScroll]="true"
-  [virtualRowHeight]="48"
-  [virtualScrollBuffer]="20"
-  [hasMoreData]="false">
-  ...
-</ngx-virtual-infinite-table>
+<div class="products-table-container">
+  <ngx-virtual-infinite-table
+    [items]="allRows()"
+    [enableVirtualScroll]="true"
+    [virtualRowHeight]="48"
+    [virtualScrollBuffer]="20"
+    [hasMoreData]="false">
+    ...
+  </ngx-virtual-infinite-table>
+</div>
 ```
+
+```scss
+.products-table-container {
+  height: min(70vh, 700px);
+  min-height: 320px;
+}
+
+.products-table-container ngx-virtual-infinite-table {
+  display: block;
+  height: 100%;
+}
+```
+
+Use a fixed height such as `height: 560px` when that better suits the page layout. For flex or grid layouts, ensure every relevant parent can resolve the table's height.
 
 > Note: virtual scroll is automatically disabled when `expandedRowTemplate` or `enableDrag` is active (incompatible features).
 

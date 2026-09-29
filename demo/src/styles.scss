@@ -1,4 +1,7 @@
 @use '@angular/material' as mat;
+@import "@angular/cdk/overlay-prebuilt.css";
+@import "@angular/cdk/text-field-prebuilt.css";
+
 
 html, body {
   height: 100%;

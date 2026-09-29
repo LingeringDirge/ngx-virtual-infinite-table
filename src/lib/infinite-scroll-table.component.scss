@@ -72,31 +72,19 @@
             }
 
             .virtual-viewport {
-                display: block;
-                position: relative;
                 height: 100%;
-                min-height: 0;
+                will-change: scroll-position;
+                -webkit-overflow-scrolling: touch;
                 outline: none;
                 overflow-y: scroll;
                 overflow-x: auto;
+                position: relative;
                 z-index: 1;
                 background-color: var(--mat-sys-surface, #ffffff);
-                will-change: scroll-position;
-                -webkit-overflow-scrolling: touch;
-                transform: translateZ(0);
+                contain: strict;
 
                 ::ng-deep .cdk-virtual-scroll-content-wrapper {
-                    position: absolute;
-                    top: 0;
-                    left: 0;
                     min-width: 100%;
-                    width: 100%;
-                }
-
-                ::ng-deep .cdk-virtual-scroll-spacer {
-                    height: 1px;
-                    transform-origin: 0 0;
-                    flex: 0 0 auto;
                 }
             }
         }
@@ -267,13 +255,23 @@
 
     // Fit Content Mode (renders standard table layout)
     .fit-content {
+        .mat-expansion-row {
+            &.expanded {
+                display: table-row !important;
+            }
+            td,
+            mat-cell {
+                display: table-cell !important;
+            }
+        }
+
         mat-table {
             overflow-x: auto;
         }
 
         mat-header-row,
         mat-row {
-            display: table-row;
+            display: table-row !important;
         }
 
         mat-header-cell {
@@ -300,7 +298,18 @@
             &.drag-column,
             &.checkbox-column {
                 width: 0%;
+                min-width: 0;
+                max-width: none;
+                flex: none;
+                display: table-cell !important;
+                vertical-align: middle;
+                text-align: center;
             }
+        }
+
+        mat-header-cell.cdk-table-sticky,
+        mat-cell.cdk-table-sticky {
+            position: static !important;
         }
     }
 

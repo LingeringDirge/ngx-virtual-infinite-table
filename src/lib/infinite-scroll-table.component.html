@@ -341,6 +341,7 @@
                     <ng-container [matColumnDef]="entry.col.title || entry.idx.toString()" [sticky]="!!entry.col.sticky" [stickyEnd]="!!entry.col.stickyEnd">
                         <mat-cell
                             *matCellDef="let data; let cellIndex = index"
+                            style="display: flex !important; align-items: center !important;"
                             (click)="rowActionClick(cellIndex + virtualRangeStart(), entry.col.dataKey, $event)"
                             [style.flex]="getColumnWidth(entry.col, entry.idx) ? '0 0 ' + getColumnWidth(entry.col, entry.idx) + 'px' : entry.col.flex"
                             [style.min-width.px]="getColumnWidth(entry.col, entry.idx)"
@@ -358,6 +359,7 @@
 
                 <mat-row
                     *matRowDef="let row; columns: virtualColumnKeys(); let i = index"
+                    style="display: flex !important; min-height: 48px !important; width: 100% !important; align-items: center !important;"
                     [class.interactive]="interactive()"
                     [class.virtual-row-even]="(i + virtualRangeStart()) % 2 === 0"
                     [class.virtual-row-odd]="(i + virtualRangeStart()) % 2 !== 0"

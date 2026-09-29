@@ -225,4 +225,11 @@ describe('InfiniteScrollTableComponent', () => {
         console.log('virtualViewport:', !!component.virtualViewport);
         console.log('renderedRange:', component.virtualViewport?.getRenderedRange());
     });
+    it('should disable virtual scroll when fitContent is true', () => {
+        fixture.componentRef.setInput('enableVirtualScroll', true);
+        fixture.componentRef.setInput('fitContent', true);
+        fixture.detectChanges();
+
+        expect(component.effectiveVirtualScroll()).toBe(false);
+    });
 });

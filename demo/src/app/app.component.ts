@@ -159,6 +159,10 @@ export class AppComponent implements OnInit, OnDestroy {
     // ── Table State ────────────────────────────────────────────────────────
     /** Rows currently passed to `<ngx-virtual-infinite-table [items]="displayedProducts()">`. */
     public displayedProducts = signal<ProductItem[]>([]);
+    constructor() {
+        window.addEventListener("error", (e) => console.error("[WINDOW ERROR]", e.error || e.message));
+        window.addEventListener("unhandledrejection", (e) => console.error("[PROMISE REJECTION]", e.reason));
+    }
     public isLoading = signal<boolean>(false);
     public hasMoreData = signal<boolean>(true);
 

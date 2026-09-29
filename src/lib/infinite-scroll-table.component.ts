@@ -89,10 +89,11 @@ export class InfiniteScrollTableComponent<T = any>
 
     @ViewChild('virtualViewport')
     public set virtualViewport(vp: CdkVirtualScrollViewport | undefined) {
-        this._virtualViewport = vp;
-        if (vp) {
+        if (vp && vp !== this._virtualViewport) {
+            this._virtualViewport = vp;
             this.virtualCtrl.attach(vp, this.virtualHeaderWrapper);
-        } else {
+        } else if (!vp && this._virtualViewport) {
+            this._virtualViewport = undefined;
             this.virtualCtrl.detach();
         }
     }
@@ -317,7 +318,7 @@ export class InfiniteScrollTableComponent<T = any>
 
     /** Resolved virtual-scroll flag (falls back to standard when drag or expandable rows are active). */
     public effectiveVirtualScroll = computed(
-        () => this.enableVirtualScroll() && !this.expandedRowTemplate() && !this.enableDrag()
+        () => this.enableVirtualScroll() && !this.fitContent() && !this.expandedRowTemplate() && !this.enableDrag()
     );
 
     /** Column keys for virtual mode (minus drag and expansion columns). */
@@ -444,6 +445,7 @@ export class InfiniteScrollTableComponent<T = any>
             enableVirtualScroll: !!this.enableVirtualScroll(),
             enableDrag: !!this.enableDrag(),
             hasExpandedRowTemplate: !!this.expandedRowTemplate(),
+            fitContent: !!this.fitContent(),
             hasMoreData: !!this.hasMoreData(),
             isLoading: !!this.isLoading(),
             virtualRowHeight: this.virtualRowHeight(),

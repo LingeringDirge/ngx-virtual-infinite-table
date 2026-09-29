@@ -1,7 +1,6 @@
 import { ListRange } from '@angular/cdk/collections';
 import { CdkVirtualScrollViewport } from '@angular/cdk/scrolling';
 import { ChangeDetectorRef, DestroyRef, effect, ElementRef, NgZone, WritableSignal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Subscription } from 'rxjs';
 import { TableVirtualScrollStrategy } from './table-virtual-scroll-strategy';
 
@@ -55,8 +54,7 @@ export class VirtualScrollController<T = unknown> {
     private cacheStable = false;
     private viewport: CdkVirtualScrollViewport | null = null;
     private headerWrapper: ElementRef | null = null;
-    private rangeSub?: Subscription;
-    private scrollSub?: Subscription;
+    private attachSub: Subscription | null = null;
 
     constructor(private readonly config: VirtualScrollControllerConfig<T>) {
         effect(() => {
@@ -119,8 +117,7 @@ export class VirtualScrollController<T = unknown> {
 
     /** Subscribes to the viewport's range and scroll streams. */
     public attach(viewport: CdkVirtualScrollViewport, headerWrapper: ElementRef | undefined): void {
-        this.rangeSub?.unsubscribe();
-        this.scrollSub?.unsubscribe();
+        this.detach();
 
         this.viewport = viewport;
         this.headerWrapper = headerWrapper ?? null;
@@ -132,61 +129,66 @@ export class VirtualScrollController<T = unknown> {
         // Immediately synchronize current items and row dimensions
         this.syncData(viewport);
 
-        this.rangeSub = viewport.renderedRangeStream.pipe(takeUntilDestroyed(this.config.destroyRef)).subscribe((range) => {
-            const allItems = this.config.getItems() ?? [];
-            if (allItems.length > 0 && range.end === 0) {
-                const vpHeight = viewport.getViewportSize() || 500;
-                const visibleCount = Math.max(15, Math.ceil(vpHeight / this.effectiveItemSize));
-                const buffer = this.config.getVirtualScrollBuffer();
-                range = { start: 0, end: Math.min(allItems.length, visibleCount + buffer) };
-            }
-            this.config.visibleItems.set(allItems.slice(range.start, range.end));
-            this.config.rangeStart.set(range.start);
-            this.checkLoadMore(range, allItems.length);
-            this.config.onRowsRendered({
-                startIndex: range.start,
-                stopIndex: Math.max(range.start, range.end - 1)
-            });
-            this.config.cdr.markForCheck();
+        const sub = new Subscription();
+        this.attachSub = sub;
 
-            requestAnimationFrame(() => {
-                if (!this.rowHeightMeasured && allItems.length > 0) {
-                    this.rowHeightMeasured = true;
-                    this.measureAndUpdateRowHeight();
+        sub.add(
+            viewport.renderedRangeStream.subscribe((rawRange) => {
+                const allItems = this.config.getItems() ?? [];
+                let range = rawRange;
+                if (allItems.length > 0 && range.end === 0) {
+                    const vpHeight = viewport.getViewportSize() || 500;
+                    const visibleCount = Math.max(15, Math.ceil(vpHeight / this.effectiveItemSize));
+                    const buffer = this.config.getVirtualScrollBuffer();
+                    range = { start: 0, end: Math.min(allItems.length, visibleCount + buffer) };
                 }
-            });
-            if (!this.cacheStable) {
-                this.scheduleWidthSync();
-            }
-        });
+                this.config.visibleItems.set(allItems.slice(range.start, range.end));
+                this.config.rangeStart.set(range.start);
+                this.checkLoadMore(range, allItems.length);
+                this.config.onRowsRendered({
+                    startIndex: range.start,
+                    stopIndex: Math.max(range.start, range.end - 1)
+                });
+                this.config.cdr.markForCheck();
+
+                requestAnimationFrame(() => {
+                    if (!this.rowHeightMeasured && allItems.length > 0) {
+                        this.rowHeightMeasured = true;
+                        this.measureAndUpdateRowHeight();
+                    }
+                });
+                if (!this.cacheStable) {
+                    this.scheduleWidthSync();
+                }
+            })
+        );
 
         this.config.ngZone.runOutsideAngular(() => {
-            this.scrollSub = viewport
-                .elementScrolled()
-                .pipe(takeUntilDestroyed(this.config.destroyRef))
-                .subscribe(() => {
+            sub.add(
+                viewport.elementScrolled().subscribe(() => {
                     this.syncHorizontalScroll();
                     this.updateScrollingState();
                     this.checkScrolledUp();
-                });
+                })
+            );
         });
     }
 
-    /** Clears timers on destroy. */
+    /** Detaches the current viewport and header references. */
     public detach(): void {
-        this.rangeSub?.unsubscribe();
-        this.scrollSub?.unsubscribe();
+        this.attachSub?.unsubscribe();
+        this.attachSub = null;
         this.viewport = null;
         this.headerWrapper = null;
     }
 
+    /** Clears pending timers. Call from ngOnDestroy. */
     public destroy(): void {
-        this.rangeSub?.unsubscribe();
-        this.scrollSub?.unsubscribe();
         if (this.scrollingTimer) {
             clearTimeout(this.scrollingTimer);
             this.scrollingTimer = null;
         }
+        this.detach();
     }
 
     /** Clears row-height and column-width caches. */

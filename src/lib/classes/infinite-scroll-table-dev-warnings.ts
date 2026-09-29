@@ -13,6 +13,7 @@ export function warnInfiniteScrollConfig(opts: {
     enableVirtualScroll: boolean;
     enableDrag: boolean;
     hasExpandedRowTemplate: boolean;
+    fitContent?: boolean;
     hasMoreData?: boolean;
     isLoading?: boolean;
     virtualRowHeight?: number;
@@ -29,6 +30,12 @@ export function warnInfiniteScrollConfig(opts: {
     if (opts.enableVirtualScroll && opts.hasExpandedRowTemplate) {
         console.warn(
             '[InfiniteScrollTable] `enableVirtualScroll` is incompatible with `expandedRowTemplate`. Virtual scrolling will be disabled.'
+        );
+    }
+
+    if (opts.enableVirtualScroll && opts.fitContent) {
+        console.warn(
+            '[InfiniteScrollTable] `enableVirtualScroll` is incompatible with `fitContent`. Virtual scrolling will be disabled.'
         );
     }
 

@@ -338,7 +338,7 @@
                 }
 
                 @for (entry of visibleTemplateColumns(); track entry.col; let columnIndex = $index) {
-                    <ng-container [matColumnDef]="entry.col.title || entry.idx.toString()">
+                    <ng-container [matColumnDef]="entry.col.title || entry.idx.toString()" [sticky]="!!entry.col.sticky" [stickyEnd]="!!entry.col.stickyEnd">
                         <mat-cell
                             *matCellDef="let data; let cellIndex = index"
                             (click)="rowActionClick(cellIndex + virtualRangeStart(), entry.col.dataKey, $event)"
